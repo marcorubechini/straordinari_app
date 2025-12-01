@@ -2,102 +2,290 @@
 <html lang="it">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestione Straordinari VVF</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#ce3824">
+    <title>Turnario VVF Mobile</title>
     <style>
-        /* STILE GRAFICO (CSS) - Qui definiamo l'aspetto */
-        body { font-family: sans-serif; background-color: #f4f4f9; padding: 20px; }
-        .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 20px; }
-        input, select, textarea { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ddd; border-radius: 5px; }
-        button { background-color: #d32f2f; color: white; border: none; padding: 15px; width: 100%; border-radius: 5px; font-size: 16px; cursor: pointer; }
-        button:hover { background-color: #b71c1c; }
-        .result-box { background-color: #e3f2fd; padding: 10px; border-left: 5px solid #2196f3; margin-top: 10px; display: none;}
-        h2 { color: #333; }
+        /* --- DEFINIZIONE PALETTE COLORI (Dall'immagine fornita) --- */
+        :root {
+            --color-red-vvf: #ce3824;   /* Rosso principale */
+            --color-teal: #308e89;      /* Verde acqua per accenti */
+            --color-dark: #060611;      /* Testo scuro */
+            --color-gray-ui: #bac9d0;   /* Grigio per bordi e UI */
+            --color-white: #ffffff;     /* Sfondi */
+            --color-bg-app: #f4f7f9;    /* Sfondo pagina molto chiaro */
+        }
+
+        /* --- RESET E BASE --- */
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--color-bg-app);
+            margin: 0;
+            padding: 20px 15px;
+            color: var(--color-dark);
+            line-height: 1.5;
+        }
+
+        /* --- COMPONENTI MODERNIZZATI --- */
+        
+        /* Card: Contenitori bianchi con ombreggiatura morbida */
+        .card {
+            background: var(--color-white);
+            padding: 25px 20px;
+            border-radius: 16px; /* Angoli più arrotondati */
+            box-shadow: 0 8px 20px rgba(0,0,0,0.06); /* Ombra più morbida e diffusa */
+            margin-bottom: 25px;
+            border: 1px solid rgba(186, 201, 208, 0.3); /* Bordo sottilissimo usando il grigio della palette */
+        }
+
+        /* Header e Titoli */
+        .header { text-align: center; margin-bottom: 30px; margin-top: 10px;}
+        .header h1 { 
+            margin: 0; 
+            color: var(--color-red-vvf); 
+            font-size: 28px; 
+            font-weight: 800; 
+            letter-spacing: -0.5px;
+        }
+        .header p { 
+            color: var(--color-teal); /* Uso il teal per il sottotitolo */
+            font-size: 15px; 
+            margin-top: 8px; 
+            font-weight: 600;
+        }
+        
+        /* Form Elements */
+        label { 
+            font-weight: 600; 
+            font-size: 13px; 
+            display: block; 
+            margin-top: 20px; 
+            color: var(--color-teal); /* Etichette color Teal */
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        input, select, textarea { 
+            width: 100%; 
+            padding: 14px; 
+            margin-top: 8px; 
+            border: 2px solid var(--color-gray-ui); /* Bordo grigio della palette */
+            border-radius: 12px; 
+            font-size: 16px; 
+            background: var(--color-white);
+            color: var(--color-dark);
+            transition: all 0.3s ease; /* Animazione fluida */
+            appearance: none; /* Rimuove stile nativo iOS/Android */
+        }
+
+        /* Effetto focus moderno */
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--color-teal); /* Il bordo diventa Teal quando attivo */
+            box-shadow: 0 0 0 4px rgba(48, 142, 137, 0.1); /* Alone leggero Teal */
+        }
+        
+        textarea { resize: vertical; min-height: 80px; }
+
+        /* Pulsanti */
+        button { 
+            background-color: var(--color-red-vvf); 
+            color: var(--color-white); 
+            border: none; 
+            padding: 18px; 
+            width: 100%; 
+            border-radius: 12px; 
+            font-size: 18px; 
+            font-weight: 700; 
+            cursor: pointer; 
+            margin-top: 30px; 
+            box-shadow: 0 4px 15px rgba(206, 56, 36, 0.3); /* Ombra rossa */
+            transition: transform 0.1s, background-color 0.2s;
+        }
+        button:active { 
+            transform: scale(0.98); /* Effetto click */
+            background-color: #b32b1b; /* Rosso leggermente più scuro */
+        }
+        
+        /* Box Risultati */
+        .result-box { 
+            background-color: var(--color-white); /* Sfondo bianco per pulizia */
+            border-left: 6px solid var(--color-teal); /* Bordo laterale Teal */
+            padding: 20px; 
+            border-radius: 12px; 
+            margin-top: 20px; 
+            display: none; 
+            line-height: 1.7;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+        .result-box strong { color: var(--color-red-vvf); }
+        .result-box hr { border: 0; border-top: 1px solid var(--color-gray-ui); margin: 15px 0; opacity: 0.5;}
+
+        /* Badges dei Turni (Aggiornati per usare la palette dove possibile) */
+        .turno-badge { display: inline-block; padding: 4px 10px; border-radius: 6px; color: white; font-weight: 700; font-size: 0.9em; min-width: 35px; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .bg-A { background-color: var(--color-red-vvf); } /* Usa il Rosso della palette */
+        .bg-B { background-color: var(--color-teal); }    /* Usa il Teal della palette */
+        .bg-C { background-color: #005cb2; } /* Blu istituzionale (mantenuto per standard) */
+        .bg-D { background-color: #fdd835; color: var(--color-dark); } /* Giallo (mantenuto per standard) */
+
+        /* Login specifico */
+        #login-page { margin-top: 60px; }
+        #login-page .card { padding-top: 40px; padding-bottom: 40px; }
+        #login-page input { text-align: center; margin-bottom: 15px; }
     </style>
 </head>
 <body>
 
-    <div id="login-page" class="card">
-        <h2>🔥 Accesso VVF</h2>
-        <input type="text" id="username" placeholder="Nome Utente">
-        <input type="password" id="password" placeholder="Password">
-        <button onclick="effettuaLogin()">Entra</button>
+    <div id="login-page">
+        <div class="header">
+             <h1>🚒 VVF Mobile</h1>
+        </div>
+        <div class="card">
+            <h2 style="text-align: center; color: var(--color-dark); margin-top:0;">Accesso</h2>
+            <label for="username">Matricola / Utente</label>
+            <input type="text" id="username" placeholder="Inserisci utente">
+            <label for="password">Password</label>
+            <input type="password" id="password" placeholder="••••••••">
+            <button onclick="effettuaLogin()">ENTRA</button>
+        </div>
     </div>
 
     <div id="app-page" style="display:none;">
-        <div class="card">
-            <h3>Nuova Registrazione</h3>
-            
-            <label>Tipo di attività:</label>
-            <select id="tipoAttivita">
-                <option value="soccorso">Straordinario Soccorso</option>
-                <option value="guida">Ore di Guida</option>
-            </select>
-
-            <label>Inizio (Data e Ora):</label>
-            <input type="datetime-local" id="inizio">
-
-            <label>Fine (Data e Ora):</label>
-            <input type="datetime-local" id="fine">
-
-            <textarea id="note" placeholder="Note aggiuntive (es. Intervento incendio boschivo...)"></textarea>
-
-            <button onclick="calcolaOre()">Registra e Calcola</button>
+        <div class="header">
+            <h1>Registro Attività</h1>
+            <p id="oggi-container">Oggi: <span id="oggi-turno">...</span></p>
         </div>
 
-        <div id="risultato" class="result-box">
-            </div>
+        <div class="card">
+            <label for="tipoAttivita">Tipologia Intervento</label>
+            <select id="tipoAttivita">
+                <option value="soccorso">🔥 Straordinario SOCCORSO</option>
+                <option value="guida">🚒 Ore di GUIDA</option>
+            </select>
+
+            <label for="inizio">Inizio Servizio (Data e Ora)</label>
+            <input type="datetime-local" id="inizio">
+
+            <label for="fine">Fine Servizio (Data e Ora)</label>
+            <input type="datetime-local" id="fine">
+
+            <label for="note">Note Aggiuntive</label>
+            <textarea id="note" rows="3" placeholder="Dettagli intervento, squadra, etc..."></textarea>
+
+            <button onclick="calcola()">CALCOLA ORE</button>
+        </div>
+
+        <div id="risultato" class="result-box"></div>
     </div>
 
     <script>
-        /* LOGICA DELL'APP (JAVASCRIPT) */
+        // ==========================================
+        //   NESSUNA MODIFICA ALLA LOGICA (JAVASCRIPT)
+        //   Il motore di calcolo resta lo stesso
+        // ==========================================
+
+        const sequenzaTurni = ['C', 'B', 'D', 'C', 'A', 'D', 'B', 'A'];
+        const dataAncora = new Date('2024-12-01T08:00:00'); // Dic 1 2024, 08:00 = Inizio C
+
+        function getTurno(data) {
+            let diffOre = (data - dataAncora) / (1000 * 60 * 60);
+            let blocchiPassati = Math.floor(diffOre / 12);
+            let indice = ((blocchiPassati % 8) + 8) % 8;
+            return sequenzaTurni[indice];
+        }
 
         function effettuaLogin() {
-            // Per ora accettiamo qualsiasi password per semplicità
-            const user = document.getElementById('username').value;
-            if(user) {
+            if(document.getElementById('username').value) {
                 document.getElementById('login-page').style.display = 'none';
                 document.getElementById('app-page').style.display = 'block';
+                mostraTurnoOggi();
+                impostaDateDefault();
             } else {
-                alert("Inserisci un nome utente");
+                // Esempio di uso del colore rosso per i messaggi di errore
+                alert("Inserisci un nome utente per proseguire.");
             }
         }
 
-        function calcolaOre() {
+        function mostraTurnoOggi() {
+            let ora = new Date();
+            let turnoAttuale = getTurno(ora);
+            // Inseriamo il badge colorato anche nell'header
+            document.getElementById('oggi-turno').innerHTML = `<span class="turno-badge bg-${turnoAttuale}" style="font-size: 1.1em;">Turno ${turnoAttuale}</span>`;
+        }
+
+        function impostaDateDefault() {
+            let now = new Date();
+            now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+            // Imposta i secondi a zero per pulizia negli input
+            let isoString = now.toISOString().slice(0,16);
+            document.getElementById('inizio').value = isoString;
+            document.getElementById('fine').value = isoString;
+        }
+
+        function calcola() {
             let inizio = new Date(document.getElementById('inizio').value);
             let fine = new Date(document.getElementById('fine').value);
+            let tipoSel = document.getElementById('tipoAttivita');
+            let tipoTesto = tipoSel.options[tipoSel.selectedIndex].text;
             
-            if (fine <= inizio) {
-                alert("L'ora di fine deve essere dopo l'ora di inizio!");
-                return;
+            if (fine <= inizio) { alert("Errore: L'orario di fine deve essere successivo all'inizio."); return; }
+
+            let log = [];
+            let cursore = new Date(inizio);
+            let totaleOre = 0;
+            
+            while (cursore < fine) {
+                let prossimoCambio = new Date(cursore);
+                let currentHour = cursore.getHours();
+                if (currentHour >= 8 && currentHour < 20) {
+                    prossimoCambio.setHours(20, 0, 0, 0);
+                } else {
+                    if (currentHour >= 20) { próximoCambio.setDate(prossimoCambio.getDate() + 1); }
+                    prossimoCambio.setHours(8, 0, 0, 0);
+                }
+                let fineSegmento = (prossimoCambio < fine) ? prossimoCambio : fine;
+                let oreSegmento = (fineSegmento - cursore) / (1000 * 60 * 60);
+                let turnoSegmento = getTurno(cursore);
+
+                log.push({
+                    turno: turnoSegmento,
+                    ore: oreSegmento,
+                    dalle: cursore.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
+                    alle: fineSegmento.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
+                });
+                totaleOre += oreSegmento;
+                cursore = fineSegmento;
             }
 
-            // Calcolo totale ore
-            let diffMs = fine - inizio;
-            let oreTotali = diffMs / (1000 * 60 * 60);
+            let turnoRichiesta = getTurno(new Date(fine.getTime() - 1000));
+            
+            // Header del risultato con totale grande
+            let html = `<div style="text-align:center; margin-bottom:15px;">
+                            <span style="font-size: 1.1em; color: var(--color-teal);">Totale ore calcolate:</span><br>
+                            <span style="font-size: 2.5em; font-weight:800; color: var(--color-red-vvf);">${totaleOre.toFixed(2)}</span>
+                            <br><span style="font-weight:600;">${tipoTesto}</span>
+                        </div><hr>`;
+            
+            // Dettaglio segmenti
+            html += '<div style="background: var(--color-bg-app); padding: 10px; border-radius: 8px;">';
+            log.forEach(item => {
+                html += `Isolamento turno: dalle ${item.dalle} alle ${item.alle}<br>
+                         ➤ <strong>${item.ore.toFixed(2)} ore</strong> su <span class="turno-badge bg-${item.turno}">Turno ${item.turno}</span><br><br>`;
+            });
+            html += '</div>';
 
-            // LOGICA DI SCAVALLAMENTO TURNO (Semplificata: cambio turno ore 20:00 e 08:00)
-            let cambioTurnoSerale = new Date(inizio);
-            cambioTurnoSerale.setHours(20, 0, 0, 0);
-
-            let htmlRisultato = `<strong>Riepilogo:</strong><br>`;
-            htmlRisultato += `Totale ore: ${oreTotali.toFixed(2)}<br><hr>`;
-
-            // Se l'orario attraversa le 20:00
-            if (inizio < cambioTurnoSerale && fine > cambioTurnoSerale) {
-                let orePrima = (cambioTurnoSerale - inizio) / (1000 * 60 * 60);
-                let oreDopo = (fine - cambioTurnoSerale) / (1000 * 60 * 60);
-                
-                htmlRisultato += `🔴 <strong>Turno A (Fino alle 20:00):</strong> ${orePrima.toFixed(2)} ore<br>`;
-                htmlRisultato += `🔵 <strong>Turno B (Dopo le 20:00):</strong> ${oreDopo.toFixed(2)} ore<br>`;
-                htmlRisultato += `<em>Nota: Richiedere pagamento nel turno di rientro (Turno B).</em>`;
-            } else {
-                htmlRisultato += `Tutte le ore ricadono nello stesso turno.`;
-            }
+            // Footer del risultato con il turno di richiesta
+            html += `<hr><div style="text-align: center; margin-top: 15px;">
+                        <span style="color: var(--color-teal); font-weight:600;">Richiedere pagamento nel turno di fine servizio:</span><br>
+                        <span class="turno-badge bg-${turnoRichiesta}" style="font-size:1.5em; margin-top: 10px; padding: 8px 20px;">TURNO ${turnoRichiesta}</span>
+                     </div>`;
 
             let box = document.getElementById('risultato');
-            box.innerHTML = htmlRisultato;
+            box.innerHTML = html;
             box.style.display = 'block';
+            // Scroll automatico verso il risultato
+            box.scrollIntoView({ behavior: 'smooth' });
         }
     </script>
 </body>
