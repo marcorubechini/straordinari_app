@@ -48,6 +48,7 @@
             border-radius: 10px; 
             font-size: 16px; 
             background: #fff;
+            box-sizing: border-box; /* Fix per larghezza padding */
             transition: border-color 0.3s;
         }
         input:focus, select:focus, textarea:focus { 
@@ -181,15 +182,19 @@
 
     <script>
         // ===============================================
-        //  1. CONFIGURAZIONE MATEMATICA TURNI
+        //  1. CONFIGURAZIONE MATEMATICA TURNI (CORRETTA)
         // ===============================================
         
-        // Sequenza basata sui tuoi dati: C, B, D, C, A, D, B, A
+        // Sequenza basata sull'immagine fornita (Dicembre 2025)
+        // Giorno 1: C (Diurno), B (Notturno)
+        // Giorno 2: D (Diurno), C (Notturno)
+        // Giorno 3: A (Diurno), D (Notturno)
+        // Giorno 4: B (Diurno), A (Notturno) -> poi ripete C
         const sequenzaTurni = ['C', 'B', 'D', 'C', 'A', 'D', 'B', 'A'];
         
-        // PUNTO ZERO ASSOLUTO: 1 Dicembre 2024 ore 08:00 = Turno C
-        // Usiamo new Date(anno, mese-1, giorno, ore) per bloccare il fuso orario locale
-        const dataAncora = new Date(2024, 11, 1, 8, 0, 0); // 11 = Dicembre
+        // PUNTO ZERO ASSOLUTO AGGIORNATO: 1 Dicembre 2025 ore 08:00 = Inizio Turno C
+        // Nota: Mese 11 = Dicembre in JavaScript
+        const dataAncora = new Date(2025, 11, 1, 8, 0, 0); 
 
         function getTurno(dataOggetto) {
             // Calcola la differenza in millisecondi dall'ancora
@@ -276,6 +281,9 @@
             impostaDateDefault();
             aggiornaTurnoOggi();
             caricaStorico();
+            
+            // Aggiorna il turno ogni minuto per sicurezza
+            setInterval(aggiornaTurnoOggi, 60000);
         }
 
         function logout() {
@@ -290,7 +298,6 @@
             let now = new Date();
             let turno = getTurno(now);
             
-            // Debug visivo: se è il 1 Dicembre 2024 e non esce C, c'è un problema
             document.getElementById('oggi-turno-badge').innerHTML = 
                 `<span class="badge bg-${turno}" style="font-size:1.2em;">TURNO ${turno}</span>`;
         }
