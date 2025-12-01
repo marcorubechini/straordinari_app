@@ -2,9 +2,21 @@
 <html lang="it">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>VVF Smart - Terminale Operativo</title>
     
+    <!-- CONFIGURAZIONE WEB APP (PWA) -->
+    <!-- Rende l'app a schermo intero quando salvata in home -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="VVF Smart">
+    <meta name="theme-color" content="#ce3824"> <!-- Colore Rosso VVF per la barra di stato Android -->
+    
+    <!-- ICONA PER LA HOME SCREEN (Link pubblico VVF per icona app) -->
+    <link rel="apple-touch-icon" href="https://upload.wikimedia.org/wikipedia/commons/thumb/c/cc/Vigili_del_Fuoco_Italy.svg/240px-Vigili_del_Fuoco_Italy.svg.png">
+    <link rel="icon" type="image/png" href="https://upload.wikimedia.org/wikipedia/commons/thumb/c/cc/Vigili_del_Fuoco_Italy.svg/32px-Vigili_del_Fuoco_Italy.svg.png">
+
     <!-- FONT EXO 2 (GOOGLE FONTS) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -32,6 +44,9 @@
             background-color: var(--vvf-crema); 
             margin: 0; 
             padding: 20px 15px; 
+            /* Padding extra per iPhone X/11/12/13/14/15 con notch */
+            padding-top: env(safe-area-inset-top, 20px);
+            padding-bottom: env(safe-area-inset-bottom, 20px);
             color: var(--tech-dark);
             -webkit-font-smoothing: antialiased;
             overflow-x: hidden;
