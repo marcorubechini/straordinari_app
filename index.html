@@ -56,26 +56,28 @@
 
         .tech-bg-drawing {
             position: absolute;
-            width: 80%;
-            max-width: 500px;
+            width: 85%; /* Leggermente più grandi per apprezzare i dettagli */
+            max-width: 600px;
             opacity: 0;
             fill: none;
-            stroke: rgba(0, 0, 0, 0.08); /* Disegno molto leggero */
-            stroke-width: 1.5;
-            animation: cycleDrawings 20s infinite;
+            stroke: rgba(0, 0, 0, 0.2); /* Colore scuro per visibilità */
+            stroke-width: 1.5; /* Linee spesse */
+            stroke-linejoin: round;
+            stroke-linecap: round;
+            animation: cycleDrawings 24s infinite; /* Rallentato per godersi i dettagli */
         }
 
         /* Ritardi per l'alternanza dei disegni */
         .tech-bg-drawing:nth-child(1) { animation-delay: 0s; }
-        .tech-bg-drawing:nth-child(2) { animation-delay: 5s; }
-        .tech-bg-drawing:nth-child(3) { animation-delay: 10s; }
-        .tech-bg-drawing:nth-child(4) { animation-delay: 15s; }
+        .tech-bg-drawing:nth-child(2) { animation-delay: 6s; }
+        .tech-bg-drawing:nth-child(3) { animation-delay: 12s; }
+        .tech-bg-drawing:nth-child(4) { animation-delay: 18s; }
 
         @keyframes cycleDrawings {
-            0% { opacity: 0; transform: scale(0.95); }
+            0% { opacity: 0; transform: scale(0.98); }
             5% { opacity: 1; transform: scale(1); }
             20% { opacity: 1; transform: scale(1); }
-            25% { opacity: 0; transform: scale(1.05); }
+            25% { opacity: 0; transform: scale(1.02); }
             100% { opacity: 0; }
         }
         
@@ -275,40 +277,124 @@
 </head>
 <body>
 
-    <!-- SFONDO ANIMATO CON DISEGNI TECNICI -->
+    <!-- SFONDO ANIMATO CON DISEGNI TECNICI COMPLESSI -->
     <div class="tech-background-container">
-        <!-- 1. APS (Auto Pompa Serbatoio) -->
-        <svg class="tech-bg-drawing" viewBox="0 0 200 100">
-            <path d="M20 70 L20 40 L40 20 L70 20 L70 70 M75 70 L75 20 L180 20 L180 70 M45 70 L65 70 M95 70 L160 70" stroke="currentColor" />
-            <circle cx="60" cy="70" r="12" stroke="currentColor" />
-            <circle cx="140" cy="70" r="12" stroke="currentColor" />
-            <path d="M80 25 L175 25 M80 35 L175 35 M80 45 L175 45" stroke-dasharray="4,2" stroke="currentColor" />
+        <!-- 1. APS (Auto Pompa Serbatoio) - BLUEPRINT DETTAGLIATO -->
+        <svg class="tech-bg-drawing" viewBox="0 0 400 200">
+            <!-- Telaio e Ruote -->
+            <circle cx="90" cy="150" r="22" />
+            <circle cx="90" cy="150" r="8" /> <!-- Mozzo -->
+            <circle cx="310" cy="150" r="22" />
+            <circle cx="310" cy="150" r="8" /> <!-- Mozzo -->
+            <path d="M50 150 L350 150 M40 150 L60 150 M280 150 L340 150" stroke-dasharray="4,4" opacity="0.6"/> <!-- Linea terra -->
+            
+            <!-- Cabina -->
+            <path d="M40 150 L40 80 L50 60 L130 60 L130 150" />
+            <path d="M52 62 L52 90 L90 90 L90 62 Z" /> <!-- Finestrino -->
+            <line x1="90" y1="60" x2="90" y2="150" stroke-width="0.5"/> <!-- Divisione portiera -->
+            <rect x="45" y="110" width="10" height="20" rx="2" /> <!-- Faro -->
+
+            <!-- Carrozzeria e Serrande -->
+            <rect x="135" y="55" width="230" height="95" />
+            <rect x="145" y="70" width="60" height="60" /> <!-- Serranda 1 -->
+            <line x1="145" y1="80" x2="205" y2="80" opacity="0.5"/>
+            <line x1="145" y1="90" x2="205" y2="90" opacity="0.5"/>
+            <line x1="145" y1="100" x2="205" y2="100" opacity="0.5"/>
+            <line x1="145" y1="110" x2="205" y2="110" opacity="0.5"/>
+            <line x1="145" y1="120" x2="205" y2="120" opacity="0.5"/>
+
+            <rect x="220" y="70" width="60" height="60" /> <!-- Serranda 2 -->
+            <rect x="295" y="70" width="60" height="60" /> <!-- Serranda 3 -->
+            
+            <!-- Dettagli Tetto -->
+            <line x1="140" y1="50" x2="360" y2="50" stroke-width="2"/> <!-- Scala -->
+            <line x1="150" y1="45" x2="150" y2="55"/>
+            <line x1="180" y1="45" x2="180" y2="55"/>
+            <line x1="210" y1="45" x2="210" y2="55"/>
+            <line x1="240" y1="45" x2="240" y2="55"/>
+            <line x1="270" y1="45" x2="270" y2="55"/>
+            
+            <!-- Quote Tecniche (Decorativo) -->
+            <line x1="40" y1="180" x2="365" y2="180" stroke-width="0.5" stroke-dasharray="2,2"/>
+            <text x="200" y="190" font-size="10" fill="currentColor" text-anchor="middle" font-family="monospace" stroke="none">APS-VVF TYPE 2</text>
         </svg>
         
-        <!-- 2. Autoscala -->
-        <svg class="tech-bg-drawing" viewBox="0 0 200 100">
-            <path d="M20 70 L170 70 L170 50 L40 50 L20 70" stroke="currentColor" />
-            <line x1="50" y1="50" x2="160" y2="10" stroke="currentColor" stroke-width="2" />
-            <line x1="55" y1="52" x2="165" y2="12" stroke="currentColor" stroke-width="2" />
-            <line x1="60" y1="50" x2="60" y2="25" stroke="currentColor" />
-            <circle cx="50" cy="70" r="10" stroke="currentColor" />
-            <circle cx="140" cy="70" r="10" stroke="currentColor" />
+        <!-- 2. AUTOSCALA - BLUEPRINT DETTAGLIATO -->
+        <svg class="tech-bg-drawing" viewBox="0 0 400 200">
+            <!-- Telaio -->
+            <path d="M50 150 L50 90 L100 90 L100 150 M105 150 L350 150 L350 110 L105 110" />
+            <circle cx="80" cy="150" r="20" />
+            <circle cx="280" cy="150" r="20" />
+            <circle cx="320" cy="150" r="20" /> <!-- Terzo asse -->
+            
+            <!-- Gruppo Scala -->
+            <circle cx="150" cy="100" r="15" /> <!-- Ralla rotazione -->
+            <path d="M150 100 L380 40" stroke-width="3" /> <!-- Pacco scala base -->
+            <path d="M150 95 L380 35" stroke-width="1" /> <!-- Corrimano -->
+            
+            <!-- Cestello -->
+            <path d="M380 30 L400 30 L400 50 L375 50" />
+            
+            <!-- Stabilizzatori -->
+            <path d="M120 140 L110 170 M130 170 L110 170" stroke-dasharray="2,2" />
+            <path d="M260 140 L270 170 M250 170 L270 170" stroke-dasharray="2,2" />
+            
+            <!-- Linee di quota -->
+            <line x1="380" y1="30" x2="380" y2="10" stroke-width="0.5"/>
+            <line x1="150" y1="100" x2="150" y2="10" stroke-width="0.5"/>
+            <line x1="150" y1="20" x2="380" y2="20" stroke-dasharray="4,2" stroke-width="0.5"/>
+            <text x="265" y="15" font-size="8" fill="currentColor" text-anchor="middle" font-family="monospace" stroke="none">L = 30m MAX EXT</text>
         </svg>
 
-        <!-- 3. Elicottero Drago -->
-        <svg class="tech-bg-drawing" viewBox="0 0 200 100">
-            <ellipse cx="100" cy="60" rx="60" ry="25" stroke="currentColor" />
-            <line x1="40" y1="60" x2="10" y2="60" stroke="currentColor" stroke-width="3" />
-            <line x1="10" y1="50" x2="10" y2="70" stroke="currentColor" stroke-width="3" />
-            <line x1="100" y1="35" x2="100" y2="10" stroke="currentColor" stroke-width="2" />
-            <line x1="40" y1="10" x2="160" y2="10" stroke="currentColor" stroke-width="2" />
+        <!-- 3. ELICOTTERO AB412 (DRAGO) - BLUEPRINT DETTAGLIATO -->
+        <svg class="tech-bg-drawing" viewBox="0 0 400 200">
+            <!-- Fusoliera -->
+            <path d="M100 100 C 100 70, 140 60, 200 60 C 260 60, 280 70, 280 100 C 280 130, 240 140, 180 140 C 140 140, 100 130, 100 100" />
+            <!-- Finestrini -->
+            <path d="M110 90 L130 75 L160 75 L160 100 L110 100 Z" />
+            <rect x="170" y="80" width="40" height="25" />
+            <rect x="220" y="80" width="30" height="25" />
+            
+            <!-- Coda e Rotore -->
+            <path d="M280 100 L360 90 L360 60 L340 60 L280 80" />
+            <circle cx="360" cy="75" r="18" stroke-dasharray="2,2" opacity="0.7"/> <!-- Disco rotore coda -->
+            <line x1="360" y1="65" x2="360" y2="85" />
+            <line x1="350" y1="75" x2="370" y2="75" />
+            
+            <!-- Rotore Principale -->
+            <rect x="190" y="45" width="20" height="15" /> <!-- Albero -->
+            <line x1="50" y1="45" x2="350" y2="45" stroke-width="2"/> <!-- Pala profilo -->
+            <ellipse cx="200" cy="45" rx="140" ry="10" stroke-dasharray="10,5" opacity="0.3"/> <!-- Disco rotore -->
+            
+            <!-- Pattini -->
+            <path d="M130 140 L120 160 L260 160 L250 140" />
+            <line x1="100" y1="160" x2="280" y2="160" stroke-width="2"/>
+            
+            <text x="200" y="180" font-size="10" fill="currentColor" text-anchor="middle" font-family="monospace" stroke="none">DRAGO - VF SERIES</text>
         </svg>
 
-        <!-- 4. Lancia Blue Devil / Alta Pressione -->
-        <svg class="tech-bg-drawing" viewBox="0 0 200 100">
-            <path d="M40 60 L140 60 L160 40 L160 70 L140 50 L40 50 Z" stroke="currentColor" />
-            <rect x="20" y="45" width="20" height="20" stroke="currentColor" />
-            <line x1="160" y1="55" x2="190" y2="55" stroke="currentColor" stroke-dasharray="2,2" />
+        <!-- 4. PICKUP/POLISOCCORSO - BLUEPRINT DETTAGLIATO -->
+        <svg class="tech-bg-drawing" viewBox="0 0 400 200">
+            <!-- Carrozzeria Pickup -->
+            <path d="M50 130 L50 100 L80 80 L160 80 L160 130" /> <!-- Cabina -->
+            <path d="M160 130 L160 90 L330 90 L330 130" /> <!-- Cassone Modulo -->
+            <rect x="170" y="95" width="150" height="30" /> <!-- Modulo AIB -->
+            
+            <!-- Ruote OFF-ROAD -->
+            <circle cx="90" cy="130" r="25" stroke-width="2"/>
+            <circle cx="90" cy="130" r="18" stroke-dasharray="2,2"/> <!-- Battistrada -->
+            <circle cx="290" cy="130" r="25" stroke-width="2"/>
+            <circle cx="290" cy="130" r="18" stroke-dasharray="2,2"/>
+            
+            <!-- Dettagli -->
+            <path d="M80 80 L80 100 L110 100 L110 80 Z" /> <!-- Finestrino -->
+            <rect x="50" y="110" width="10" height="10" /> <!-- Faro anteriore -->
+            <line x1="40" y1="120" x2="340" y2="120" stroke-width="0.5" opacity="0.5"/> <!-- Linea asse -->
+            
+            <!-- Lampeggiante -->
+            <rect x="120" y="75" width="20" height="5" fill="currentColor" opacity="0.3"/>
+            
+            <text x="190" y="170" font-size="10" fill="currentColor" text-anchor="middle" font-family="monospace" stroke="none">MODULO AIB - 4x4</text>
         </svg>
     </div>
 
@@ -655,12 +741,12 @@
         function mostraRisultatoBox(totale, segmenti, turnoRientro) {
             let htmlRes = `<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
                             <strong style="text-transform:uppercase;">Totale Calcolato</strong> 
-                            <span style="font-size:1.6em; font-weight:800; color:var(--vvf-rosso); font-family:monospace;">${totale.toFixed(2)}h</span>
+                            <span style="font-size:1.6em; font-weight:800; color:var(--vvf-rosso); font-family:monospace;">${formattaOreMinuti(totale)}</span>
                            </div>`;
             
             segmenti.forEach(s => {
                 htmlRes += `<div style="margin-bottom:4px; font-size:13px; font-family:monospace;">
-                                > ${s.ore.toFixed(2)}h su <span class="badge bg-${s.turno}" style="font-size:0.8em; padding:1px 6px;">${s.turno}</span>
+                                > ${formattaOreMinuti(s.ore)} su <span class="badge bg-${s.turno}" style="font-size:0.8em; padding:1px 6px;">${s.turno}</span>
                             </div>`;
             });
             
@@ -694,10 +780,12 @@
             }
         }
 
-        // FUNZIONE PER CONVERTIRE ORE DECIMALI IN ORE E MINUTI
+        // FUNZIONE PER CONVERTIRE ORE DECIMALI IN ORE E MINUTI (CORRETTA)
         function formattaOreMinuti(oreDecimali) {
-            let ore = Math.floor(oreDecimali);
-            let minuti = Math.round((oreDecimali - ore) * 60);
+            // Arrotonda al minuto più vicino per evitare problemi di precisione (es. 1.99999h -> 2h 00m)
+            let minutiTotali = Math.round(oreDecimali * 60);
+            let ore = Math.floor(minutiTotali / 60);
+            let minuti = minutiTotali % 60;
             return `${ore}h ${String(minuti).padStart(2, '0')}m`;
         }
 
@@ -783,7 +871,7 @@
                         <span class="badge bg-${item.rientro}" style="transform:scale(0.8)">${item.rientro}</span>
                     </div>
                     <div class="history-sub">
-                        <strong style="color:var(--vvf-rosso);">${item.tipo.toUpperCase()}</strong> <span style="color:#aaa;">|</span> ${item.totale}h <br>
+                        <strong style="color:var(--vvf-rosso);">${item.tipo.toUpperCase()}</strong> <span style="color:#aaa;">|</span> ${formattaOreMinuti(parseFloat(item.totale))} <br>
                     </div>
                     <div class="history-actions">
                         <button class="ghost" style="padding:4px 8px; width:auto; font-size:10px; margin:0; border-color:var(--tech-border);" onclick="mostraDettaglioDaStorico(${item.id})">INFO</button>
