@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestione Straordinari VVF</title>
+    <style>
+        /* STILE GRAFICO (CSS) - Qui definiamo l'aspetto */
+        body { font-family: sans-serif; background-color: #f4f4f9; padding: 20px; }
+        .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        input, select, textarea { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ddd; border-radius: 5px; }
+        button { background-color: #d32f2f; color: white; border: none; padding: 15px; width: 100%; border-radius: 5px; font-size: 16px; cursor: pointer; }
+        button:hover { background-color: #b71c1c; }
+        .result-box { background-color: #e3f2fd; padding: 10px; border-left: 5px solid #2196f3; margin-top: 10px; display: none;}
+        h2 { color: #333; }
+    </style>
+</head>
+<body>
+
+    <div id="login-page" class="card">
+        <h2>🔥 Accesso VVF</h2>
+        <input type="text" id="username" placeholder="Nome Utente">
+        <input type="password" id="password" placeholder="Password">
+        <button onclick="effettuaLogin()">Entra</button>
+    </div>
+
+    <div id="app-page" style="display:none;">
+        <div class="card">
+            <h3>Nuova Registrazione</h3>
+            
+            <label>Tipo di attività:</label>
+            <select id="tipoAttivita">
+                <option value="soccorso">Straordinario Soccorso</option>
+                <option value="guida">Ore di Guida</option>
+            </select>
+
+            <label>Inizio (Data e Ora):</label>
+            <input type="datetime-local" id="inizio">
+
+            <label>Fine (Data e Ora):</label>
+            <input type="datetime-local" id="fine">
+
+            <textarea id="note" placeholder="Note aggiuntive (es. Intervento incendio boschivo...)"></textarea>
+
+            <button onclick="calcolaOre()">Registra e Calcola</button>
+        </div>
+
+        <div id="risultato" class="result-box">
+            </div>
+    </div>
+
+    <script>
+        /* LOGICA DELL'APP (JAVASCRIPT) */
+
+        function effettuaLogin() {
+            // Per ora accettiamo qualsiasi password per semplicità
+            const user = document.getElementById('username').value;
+            if(user) {
+                document.getElementById('login-page').style.display = 'none';
+                document.getElementById('app-page').style.display = 'block';
+            } else {
+                alert("Inserisci un nome utente");
+            }
+        }
+
+        function calcolaOre() {
+            let inizio = new Date(document.getElementById('inizio').value);
+            let fine = new Date(document.getElementById('fine').value);
+            
+            if (fine <= inizio) {
+                alert("L'ora di fine deve essere dopo l'ora di inizio!");
+                return;
+            }
+
+            // Calcolo totale ore
+            let diffMs = fine - inizio;
+            let oreTotali = diffMs / (1000 * 60 * 60);
+
+            // LOGICA DI SCAVALLAMENTO TURNO (Semplificata: cambio turno ore 20:00 e 08:00)
+            let cambioTurnoSerale = new Date(inizio);
+            cambioTurnoSerale.setHours(20, 0, 0, 0);
+
+            let htmlRisultato = `<strong>Riepilogo:</strong><br>`;
+            htmlRisultato += `Totale ore: ${oreTotali.toFixed(2)}<br><hr>`;
+
+            // Se l'orario attraversa le 20:00
+            if (inizio < cambioTurnoSerale && fine > cambioTurnoSerale) {
+                let orePrima = (cambioTurnoSerale - inizio) / (1000 * 60 * 60);
+                let oreDopo = (fine - cambioTurnoSerale) / (1000 * 60 * 60);
+                
+                htmlRisultato += `🔴 <strong>Turno A (Fino alle 20:00):</strong> ${orePrima.toFixed(2)} ore<br>`;
+                htmlRisultato += `🔵 <strong>Turno B (Dopo le 20:00):</strong> ${oreDopo.toFixed(2)} ore<br>`;
+                htmlRisultato += `<em>Nota: Richiedere pagamento nel turno di rientro (Turno B).</em>`;
+            } else {
+                htmlRisultato += `Tutte le ore ricadono nello stesso turno.`;
+            }
+
+            let box = document.getElementById('risultato');
+            box.innerHTML = htmlRisultato;
+            box.style.display = 'block';
+        }
+    </script>
+</body>
+</html>
