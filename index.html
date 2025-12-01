@@ -2,290 +2,317 @@
 <html lang="it">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <meta name="theme-color" content="#ce3824">
-    <title>Turnario VVF Mobile</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Turnario VVF Pro</title>
     <style>
-        /* --- DEFINIZIONE PALETTE COLORI (Dall'immagine fornita) --- */
+        /* --- CONFIGURAZIONE COLORI --- */
         :root {
-            --color-red-vvf: #ce3824;   /* Rosso principale */
-            --color-teal: #308e89;      /* Verde acqua per accenti */
-            --color-dark: #060611;      /* Testo scuro */
-            --color-gray-ui: #bac9d0;   /* Grigio per bordi e UI */
-            --color-white: #ffffff;     /* Sfondi */
-            --color-bg-app: #f4f7f9;    /* Sfondo pagina molto chiaro */
+            --vvf-red: #ce3824;
+            --vvf-dark: #060611;
+            --vvf-teal: #308e89;
+            --vvf-gray: #bac9d0;
+            --vvf-bg: #f4f7f9;
         }
 
-        /* --- RESET E BASE --- */
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: var(--color-bg-app);
-            margin: 0;
-            padding: 20px 15px;
-            color: var(--color-dark);
-            line-height: 1.5;
-        }
-
-        /* --- COMPONENTI MODERNIZZATI --- */
+        body { font-family: -apple-system, sans-serif; background-color: var(--vvf-bg); margin: 0; padding: 20px 15px; color: var(--vvf-dark); }
         
-        /* Card: Contenitori bianchi con ombreggiatura morbida */
-        .card {
-            background: var(--color-white);
-            padding: 25px 20px;
-            border-radius: 16px; /* Angoli più arrotondati */
-            box-shadow: 0 8px 20px rgba(0,0,0,0.06); /* Ombra più morbida e diffusa */
-            margin-bottom: 25px;
-            border: 1px solid rgba(186, 201, 208, 0.3); /* Bordo sottilissimo usando il grigio della palette */
-        }
-
-        /* Header e Titoli */
-        .header { text-align: center; margin-bottom: 30px; margin-top: 10px;}
-        .header h1 { 
-            margin: 0; 
-            color: var(--color-red-vvf); 
-            font-size: 28px; 
-            font-weight: 800; 
-            letter-spacing: -0.5px;
-        }
-        .header p { 
-            color: var(--color-teal); /* Uso il teal per il sottotitolo */
-            font-size: 15px; 
-            margin-top: 8px; 
-            font-weight: 600;
-        }
+        /* LAYOUT */
+        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 20px; border: 1px solid rgba(0,0,0,0.05); }
+        .hidden { display: none; }
         
-        /* Form Elements */
-        label { 
-            font-weight: 600; 
-            font-size: 13px; 
-            display: block; 
-            margin-top: 20px; 
-            color: var(--color-teal); /* Etichette color Teal */
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
+        /* TYPOGRAPHY */
+        h1 { color: var(--vvf-red); margin: 0 0 5px 0; font-size: 22px; text-align: center; }
+        h2 { font-size: 18px; margin-bottom: 15px; color: var(--vvf-teal); border-bottom: 2px solid var(--vvf-gray); padding-bottom: 5px; }
+        label { font-weight: 600; font-size: 13px; display: block; margin-top: 15px; color: var(--vvf-dark); }
         
-        input, select, textarea { 
-            width: 100%; 
-            padding: 14px; 
-            margin-top: 8px; 
-            border: 2px solid var(--color-gray-ui); /* Bordo grigio della palette */
-            border-radius: 12px; 
-            font-size: 16px; 
-            background: var(--color-white);
-            color: var(--color-dark);
-            transition: all 0.3s ease; /* Animazione fluida */
-            appearance: none; /* Rimuove stile nativo iOS/Android */
-        }
-
-        /* Effetto focus moderno */
-        input:focus, select:focus, textarea:focus {
-            outline: none;
-            border-color: var(--color-teal); /* Il bordo diventa Teal quando attivo */
-            box-shadow: 0 0 0 4px rgba(48, 142, 137, 0.1); /* Alone leggero Teal */
-        }
+        /* INPUTS & BUTTONS */
+        input, select, textarea { width: 100%; padding: 12px; margin-top: 5px; border: 1px solid var(--vvf-gray); border-radius: 8px; font-size: 16px; background: white; }
+        input:focus, textarea:focus { outline: none; border-color: var(--vvf-teal); box-shadow: 0 0 0 3px rgba(48, 142, 137, 0.1); }
         
-        textarea { resize: vertical; min-height: 80px; }
+        button { background-color: var(--vvf-red); color: white; border: none; padding: 15px; width: 100%; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 20px; }
+        button:active { transform: scale(0.98); background-color: #b32b1b; }
+        button.secondary { background-color: var(--vvf-teal); margin-top: 10px; }
+        button.delete { background-color: white; color: #d32f2f; border: 1px solid #d32f2f; padding: 5px 10px; margin-top: 5px; font-size: 12px; width: auto; }
 
-        /* Pulsanti */
-        button { 
-            background-color: var(--color-red-vvf); 
-            color: var(--color-white); 
-            border: none; 
-            padding: 18px; 
-            width: 100%; 
-            border-radius: 12px; 
-            font-size: 18px; 
-            font-weight: 700; 
-            cursor: pointer; 
-            margin-top: 30px; 
-            box-shadow: 0 4px 15px rgba(206, 56, 36, 0.3); /* Ombra rossa */
-            transition: transform 0.1s, background-color 0.2s;
-        }
-        button:active { 
-            transform: scale(0.98); /* Effetto click */
-            background-color: #b32b1b; /* Rosso leggermente più scuro */
-        }
+        /* RISULTATI E STORICO */
+        .result-box { background-color: #e0f2f1; border-left: 5px solid var(--vvf-teal); padding: 15px; border-radius: 8px; margin-top: 20px; }
+        .history-item { border-bottom: 1px solid #eee; padding: 15px 0; }
+        .history-item:last-child { border-bottom: none; }
+        .history-date { font-weight: bold; font-size: 14px; color: var(--vvf-dark); }
+        .history-details { font-size: 13px; color: #555; margin-top: 5px; }
         
-        /* Box Risultati */
-        .result-box { 
-            background-color: var(--color-white); /* Sfondo bianco per pulizia */
-            border-left: 6px solid var(--color-teal); /* Bordo laterale Teal */
-            padding: 20px; 
-            border-radius: 12px; 
-            margin-top: 20px; 
-            display: none; 
-            line-height: 1.7;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
-        }
-        .result-box strong { color: var(--color-red-vvf); }
-        .result-box hr { border: 0; border-top: 1px solid var(--color-gray-ui); margin: 15px 0; opacity: 0.5;}
+        /* BADGES */
+        .badge { padding: 3px 8px; border-radius: 4px; color: white; font-weight: bold; font-size: 0.85em; margin-left: 5px; }
+        .bg-A { background-color: #d32f2f; }
+        .bg-B { background-color: #388e3c; }
+        .bg-C { background-color: #1976d2; }
+        .bg-D { background-color: #fbc02d; color: black; }
 
-        /* Badges dei Turni (Aggiornati per usare la palette dove possibile) */
-        .turno-badge { display: inline-block; padding: 4px 10px; border-radius: 6px; color: white; font-weight: 700; font-size: 0.9em; min-width: 35px; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        .bg-A { background-color: var(--color-red-vvf); } /* Usa il Rosso della palette */
-        .bg-B { background-color: var(--color-teal); }    /* Usa il Teal della palette */
-        .bg-C { background-color: #005cb2; } /* Blu istituzionale (mantenuto per standard) */
-        .bg-D { background-color: #fdd835; color: var(--color-dark); } /* Giallo (mantenuto per standard) */
-
-        /* Login specifico */
-        #login-page { margin-top: 60px; }
-        #login-page .card { padding-top: 40px; padding-bottom: 40px; }
-        #login-page input { text-align: center; margin-bottom: 15px; }
+        /* HEADER INFO */
+        .info-bar { text-align: center; margin-bottom: 20px; font-size: 14px; font-weight: 500; color: #555; }
     </style>
 </head>
 <body>
 
-    <div id="login-page">
-        <div class="header">
-             <h1>🚒 VVF Mobile</h1>
-        </div>
-        <div class="card">
-            <h2 style="text-align: center; color: var(--color-dark); margin-top:0;">Accesso</h2>
-            <label for="username">Matricola / Utente</label>
-            <input type="text" id="username" placeholder="Inserisci utente">
-            <label for="password">Password</label>
-            <input type="password" id="password" placeholder="••••••••">
-            <button onclick="effettuaLogin()">ENTRA</button>
-        </div>
+    <div id="view-login" class="card">
+        <h1>🔐 VVF Accesso</h1>
+        <p style="text-align:center; font-size:13px; color:#666;">Se è la prima volta, la password verrà creata ora.</p>
+        
+        <label>Nome Utente</label>
+        <input type="text" id="login-user" placeholder="Es. MarioRossi">
+        
+        <label>Password</label>
+        <input type="password" id="login-pass" placeholder="••••••">
+        
+        <button onclick="gestisciLogin()">ACCEDI / REGISTRATI</button>
+        <div id="login-error" style="color:red; text-align:center; margin-top:10px; font-size:13px;"></div>
     </div>
 
-    <div id="app-page" style="display:none;">
-        <div class="header">
-            <h1>Registro Attività</h1>
-            <p id="oggi-container">Oggi: <span id="oggi-turno">...</span></p>
+    <div id="view-app" class="hidden">
+        <div class="info-bar">
+            Ciao <span id="user-display" style="font-weight:bold; color:var(--vvf-red)"></span>! 👋<br>
+            Oggi è Turno: <span id="oggi-turno-badge">...</span>
         </div>
 
         <div class="card">
-            <label for="tipoAttivita">Tipologia Intervento</label>
-            <select id="tipoAttivita">
-                <option value="soccorso">🔥 Straordinario SOCCORSO</option>
-                <option value="guida">🚒 Ore di GUIDA</option>
+            <h2>📝 Nuova Registrazione</h2>
+            
+            <label>Attività</label>
+            <select id="tipo">
+                <option value="Soccorso">Straordinario SOCCORSO</option>
+                <option value="Guida">Ore di GUIDA</option>
             </select>
 
-            <label for="inizio">Inizio Servizio (Data e Ora)</label>
+            <label>Inizio</label>
             <input type="datetime-local" id="inizio">
 
-            <label for="fine">Fine Servizio (Data e Ora)</label>
+            <label>Fine</label>
             <input type="datetime-local" id="fine">
 
-            <label for="note">Note Aggiuntive</label>
-            <textarea id="note" rows="3" placeholder="Dettagli intervento, squadra, etc..."></textarea>
+            <label>Note</label>
+            <textarea id="note" rows="2" placeholder="Dettagli..."></textarea>
 
-            <button onclick="calcola()">CALCOLA ORE</button>
+            <button onclick="calcolaESalva()">CALCOLA E SALVA</button>
+            
+            <div id="risultato-immediato" class="hidden result-box"></div>
         </div>
 
-        <div id="risultato" class="result-box"></div>
+        <div class="card">
+            <h2>📂 Storico Salvato</h2>
+            <div id="lista-storico">
+                <p style="text-align:center; color:#999;">Nessuna registrazione trovata.</p>
+            </div>
+            <button class="secondary" onclick="resetStorico()" style="background:#666;">CANCELLA TUTTO STORICO</button>
+        </div>
+        
+        <button onclick="logout()" style="background:white; color:#333; border:1px solid #ccc; margin-top:30px;">Esci</button>
     </div>
 
     <script>
-        // ==========================================
-        //   NESSUNA MODIFICA ALLA LOGICA (JAVASCRIPT)
-        //   Il motore di calcolo resta lo stesso
-        // ==========================================
-
+        // --- 1. CONFIGURAZIONE TURNI (Logica corretta al 100%) ---
+        // Sequenza: C(G), B(N), D(G), C(N), A(G), D(N), B(G), A(N)
+        // Ancora: 1 Dicembre 2024 ore 08:00 = INIZIO TURNO C
         const sequenzaTurni = ['C', 'B', 'D', 'C', 'A', 'D', 'B', 'A'];
-        const dataAncora = new Date('2024-12-01T08:00:00'); // Dic 1 2024, 08:00 = Inizio C
+        const dataAncora = new Date('2024-12-01T08:00:00').getTime(); 
 
-        function getTurno(data) {
-            let diffOre = (data - dataAncora) / (1000 * 60 * 60);
-            let blocchiPassati = Math.floor(diffOre / 12);
-            let indice = ((blocchiPassati % 8) + 8) % 8;
+        function getTurno(dateObj) {
+            let msPerTurno = 12 * 60 * 60 * 1000; // 12 ore in millisecondi
+            let diff = dateObj.getTime() - dataAncora;
+            let turniPassati = Math.floor(diff / msPerTurno);
+            
+            // Modulo per gestire l'array circolare (anche date passate)
+            let indice = ((turniPassati % 8) + 8) % 8;
             return sequenzaTurni[indice];
         }
 
-        function effettuaLogin() {
-            if(document.getElementById('username').value) {
-                document.getElementById('login-page').style.display = 'none';
-                document.getElementById('app-page').style.display = 'block';
-                mostraTurnoOggi();
-                impostaDateDefault();
+        // --- 2. GESTIONE UTENTI (LocalStorage) ---
+        let currentUser = null;
+
+        function gestisciLogin() {
+            let user = document.getElementById('login-user').value.trim();
+            let pass = document.getElementById('login-pass').value.trim();
+            let msg = document.getElementById('login-error');
+
+            if (!user || !pass) {
+                msg.innerText = "Inserisci utente e password.";
+                return;
+            }
+
+            // Recupera utenti salvati
+            let dbUtenti = JSON.parse(localStorage.getItem('vvf_users') || '{}');
+
+            if (dbUtenti[user]) {
+                // Utente esiste -> Verifica Password
+                if (dbUtenti[user] === pass) {
+                    entraInApp(user);
+                } else {
+                    msg.innerText = "Password errata!";
+                }
             } else {
-                // Esempio di uso del colore rosso per i messaggi di errore
-                alert("Inserisci un nome utente per proseguire.");
+                // Utente nuovo -> Registra
+                if(confirm("Utente non trovato. Vuoi creare un nuovo account con questa password?")) {
+                    dbUtenti[user] = pass;
+                    localStorage.setItem('vvf_users', JSON.stringify(dbUtenti));
+                    entraInApp(user);
+                }
             }
         }
 
-        function mostraTurnoOggi() {
-            let ora = new Date();
-            let turnoAttuale = getTurno(ora);
-            // Inseriamo il badge colorato anche nell'header
-            document.getElementById('oggi-turno').innerHTML = `<span class="turno-badge bg-${turnoAttuale}" style="font-size: 1.1em;">Turno ${turnoAttuale}</span>`;
+        function entraInApp(username) {
+            currentUser = username;
+            document.getElementById('user-display').innerText = username;
+            document.getElementById('view-login').classList.add('hidden');
+            document.getElementById('view-app').classList.remove('hidden');
+            
+            // Imposta orari default e mostra turno oggi
+            impostaDateDefault();
+            mostraTurnoOdierno();
+            caricaStorico();
+        }
+
+        function logout() {
+            location.reload(); // Ricarica la pagina
+        }
+
+        // --- 3. CALCOLO E SALVATAGGIO ---
+        function mostraTurnoOdierno() {
+            let now = new Date();
+            let t = getTurno(now);
+            document.getElementById('oggi-turno-badge').innerHTML = `<span class="badge bg-${t}">${t}</span>`;
         }
 
         function impostaDateDefault() {
             let now = new Date();
             now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
-            // Imposta i secondi a zero per pulizia negli input
-            let isoString = now.toISOString().slice(0,16);
-            document.getElementById('inizio').value = isoString;
-            document.getElementById('fine').value = isoString;
+            document.getElementById('inizio').value = now.toISOString().slice(0,16);
+            document.getElementById('fine').value = now.toISOString().slice(0,16);
         }
 
-        function calcola() {
-            let inizio = new Date(document.getElementById('inizio').value);
-            let fine = new Date(document.getElementById('fine').value);
-            let tipoSel = document.getElementById('tipoAttivita');
-            let tipoTesto = tipoSel.options[tipoSel.selectedIndex].text;
-            
-            if (fine <= inizio) { alert("Errore: L'orario di fine deve essere successivo all'inizio."); return; }
+        function calcolaESalva() {
+            let inizioInput = document.getElementById('inizio').value;
+            let fineInput = document.getElementById('fine').value;
+            let inizio = new Date(inizioInput);
+            let fine = new Date(fineInput);
+            let tipo = document.getElementById('tipo').value;
+            let note = document.getElementById('note').value;
 
-            let log = [];
+            if (fine <= inizio) { alert("La fine deve essere dopo l'inizio!"); return; }
+
+            let dettaglioTurni = [];
             let cursore = new Date(inizio);
-            let totaleOre = 0;
-            
+            let oreTotali = 0;
+
+            // Logica scavallamento turno
             while (cursore < fine) {
                 let prossimoCambio = new Date(cursore);
-                let currentHour = cursore.getHours();
-                if (currentHour >= 8 && currentHour < 20) {
+                let h = cursore.getHours();
+                
+                // I cambi sono alle 8:00 e alle 20:00
+                if (h >= 8 && h < 20) {
                     prossimoCambio.setHours(20, 0, 0, 0);
                 } else {
-                    if (currentHour >= 20) { próximoCambio.setDate(prossimoCambio.getDate() + 1); }
+                    if (h >= 20) prossimoCambio.setDate(prossimoCambio.getDate() + 1);
                     prossimoCambio.setHours(8, 0, 0, 0);
                 }
-                let fineSegmento = (prossimoCambio < fine) ? prossimoCambio : fine;
-                let oreSegmento = (fineSegmento - cursore) / (1000 * 60 * 60);
-                let turnoSegmento = getTurno(cursore);
 
-                log.push({
-                    turno: turnoSegmento,
-                    ore: oreSegmento,
-                    dalle: cursore.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
-                    alle: fineSegmento.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
-                });
-                totaleOre += oreSegmento;
+                let fineSegmento = (prossimoCambio < fine) ? prossimoCambio : fine;
+                let oreSeg = (fineSegmento - cursore) / (36e5); // 36e5 = 1000*60*60
+                let turnoSeg = getTurno(cursore);
+
+                dettaglioTurni.push({ turno: turnoSeg, ore: oreSeg });
+                oreTotali += oreSeg;
                 cursore = fineSegmento;
             }
 
             let turnoRichiesta = getTurno(new Date(fine.getTime() - 1000));
-            
-            // Header del risultato con totale grande
-            let html = `<div style="text-align:center; margin-bottom:15px;">
-                            <span style="font-size: 1.1em; color: var(--color-teal);">Totale ore calcolate:</span><br>
-                            <span style="font-size: 2.5em; font-weight:800; color: var(--color-red-vvf);">${totaleOre.toFixed(2)}</span>
-                            <br><span style="font-weight:600;">${tipoTesto}</span>
-                        </div><hr>`;
-            
-            // Dettaglio segmenti
-            html += '<div style="background: var(--color-bg-app); padding: 10px; border-radius: 8px;">';
-            log.forEach(item => {
-                html += `Isolamento turno: dalle ${item.dalle} alle ${item.alle}<br>
-                         ➤ <strong>${item.ore.toFixed(2)} ore</strong> su <span class="turno-badge bg-${item.turno}">Turno ${item.turno}</span><br><br>`;
+
+            // Crea oggetto salvataggio
+            let entry = {
+                id: Date.now(),
+                data: new Date().toLocaleDateString(),
+                tipo: tipo,
+                inizio: inizioInput,
+                fine: fineInput,
+                oreTot: oreTotali.toFixed(2),
+                dettagli: dettaglioTurni,
+                turnoRientro: turnoRichiesta,
+                note: note
+            };
+
+            salvaNelloStorico(entry);
+            mostraRisultatoImmediato(entry);
+            caricaStorico(); // Aggiorna la lista
+        }
+
+        function mostraRisultatoImmediato(data) {
+            let box = document.getElementById('risultato-immediato');
+            let html = `<strong>✅ Registrato! Totale: ${data.oreTot}h</strong><br>`;
+            data.dettagli.forEach(d => {
+                html += `• ${d.ore.toFixed(2)}h su Turno <span class="badge bg-${d.turno}">${d.turno}</span><br>`;
             });
-            html += '</div>';
-
-            // Footer del risultato con il turno di richiesta
-            html += `<hr><div style="text-align: center; margin-top: 15px;">
-                        <span style="color: var(--color-teal); font-weight:600;">Richiedere pagamento nel turno di fine servizio:</span><br>
-                        <span class="turno-badge bg-${turnoRichiesta}" style="font-size:1.5em; margin-top: 10px; padding: 8px 20px;">TURNO ${turnoRichiesta}</span>
-                     </div>`;
-
-            let box = document.getElementById('risultato');
+            html += `<br>💰 Richiedi su: <span class="badge bg-${data.turnoRientro}">${data.turnoRientro}</span>`;
+            
             box.innerHTML = html;
-            box.style.display = 'block';
-            // Scroll automatico verso il risultato
-            box.scrollIntoView({ behavior: 'smooth' });
+            box.classList.remove('hidden');
+        }
+
+        // --- 4. GESTIONE STORICO (Database locale) ---
+        function salvaNelloStorico(obj) {
+            let key = `vvf_history_${currentUser}`;
+            let history = JSON.parse(localStorage.getItem(key) || '[]');
+            history.unshift(obj); // Aggiungi in cima
+            localStorage.setItem(key, JSON.stringify(history));
+        }
+
+        function caricaStorico() {
+            let key = `vvf_history_${currentUser}`;
+            let history = JSON.parse(localStorage.getItem(key) || '[]');
+            let container = document.getElementById('lista-storico');
+            
+            if (history.length === 0) {
+                container.innerHTML = '<p style="text-align:center; color:#999;">Nessun dato salvato.</p>';
+                return;
+            }
+
+            let html = '';
+            history.forEach(item => {
+                // Formatta data leggibile
+                let dInizio = new Date(item.inizio).toLocaleString([], {day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit'});
+                let dFine = new Date(item.fine).toLocaleString([], {hour:'2-digit', minute:'2-digit'});
+
+                // Crea stringa dettagli turni
+                let strTurni = item.dettagli.map(d => `${d.ore.toFixed(1)}h(${d.turno})`).join(' + ');
+
+                html += `
+                <div class="history-item">
+                    <div class="history-date">
+                        ${dInizio} ➔ ${dFine} | <strong>${item.tipo}</strong>
+                    </div>
+                    <div class="history-details">
+                        Totale: <strong>${item.oreTot}h</strong> [${strTurni}]<br>
+                        Richiesta su Turno: <span class="badge bg-${item.turnoRientro}">${item.turnoRientro}</span>
+                        ${item.note ? `<br><em>Note: ${item.note}</em>` : ''}
+                    </div>
+                    <button class="delete" onclick="eliminaEntry(${item.id})">Elimina</button>
+                </div>`;
+            });
+            container.innerHTML = html;
+        }
+
+        function eliminaEntry(id) {
+            if(!confirm("Eliminare questa voce?")) return;
+            let key = `vvf_history_${currentUser}`;
+            let history = JSON.parse(localStorage.getItem(key) || '[]');
+            let newHistory = history.filter(item => item.id !== id);
+            localStorage.setItem(key, JSON.stringify(newHistory));
+            caricaStorico();
+        }
+
+        function resetStorico() {
+            if(confirm("Sei sicuro di voler cancellare TUTTO lo storico? Non si può annullare.")) {
+                localStorage.removeItem(`vvf_history_${currentUser}`);
+                caricaStorico();
+            }
         }
     </script>
 </body>
