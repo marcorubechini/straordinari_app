@@ -205,6 +205,7 @@
             
             <div class="info-turno-box">
                 <div>
+                    <!-- Data odierna live -->
                     <strong id="data-live" style="font-size: 16px; color: var(--vvf-dark); text-transform: capitalize;">-- -- ----</strong>
                     <span style="font-size: 12px; color: #888; display:block; margin-top:2px;">In Servizio ore <span id="orario-live">--:--</span></span>
                 </div>
@@ -261,8 +262,13 @@
         // ===============================================
         //  1. CONFIGURAZIONE TURNI
         // ===============================================
+        
+        // Sequenza: C (08-20), B (20-08), D (08-20), C (20-08), A (08-20), D (20-08), B (08-20), A (20-08)
         const sequenzaTurni = ['C', 'B', 'D', 'C', 'A', 'D', 'B', 'A']; 
-        const dataAncora = new Date(2024, 11, 1, 8, 0, 0); // 1 Dic 2024 ore 08:00
+        
+        // PUNTO ZERO AGGIORNATO: 1 Dicembre 2025 ore 08:00 = TURNO C (Indice 0)
+        // Questo garantisce che oggi 1 Dicembre 2025 sia C (Giorno) e poi B (Notte).
+        const dataAncora = new Date(2025, 11, 1, 8, 0, 0); // 11 = Dicembre
 
         // LISTA GIORNI SUPER FESTIVI (Giorno/Mese)
         const superFestiviFissi = [
@@ -373,6 +379,7 @@
         }
 
         // Funzione helper per categorizzare un timestamp specifico
+        // RISPETTA RIGOROSAMENTE LE FASCE: 06:00 - 22:00
         function getCategoriaOraria(dateObj) {
             let h = dateObj.getHours();
             let d = dateObj.getDate();
@@ -380,25 +387,24 @@
             let keyDate = `${d}/${m}`;
             let dayOfWeek = dateObj.getDay(); // 0 = Domenica, 6 = Sabato
 
-            // 1. Controllo Orario Notturno (Prioritario)
+            // 1. REGOLA D'ORO: Se non siamo tra le 06:00 e le 22:00, è Notturno/Straordinario Notturno
             if (h < 6 || h >= 22) {
                 return 'notturno';
             }
 
-            // Siamo tra le 06:00 e le 22:00
+            // SE SIAMO QUI, SIAMO CERTAMENTE TRA LE 06:00 E LE 22:00
             
-            // 2. Controllo Super Festivi
+            // 2. Controllo Super Festivi (Priorità alta)
             if (superFestiviFissi.includes(keyDate) || isPasquaOPasquetta(dateObj)) {
                 return 'super_festivo';
             }
 
             // 3. Controllo Festivi (SOLO DOMENICA)
-            // NOTA: Il Sabato (dayOfWeek == 6) NON entra qui, quindi è considerato feriale.
             if (dayOfWeek === 0) {
                 return 'festivo';
             }
 
-            // 4. Altrimenti è Feriale Diurno (Lun-Sab)
+            // 4. Tutto il resto (Lun-Sab tra le 06 e le 22) è Feriale Diurno
             return 'feriale';
         }
 
@@ -432,7 +438,7 @@
                 cursore = fineSegmento;
             }
 
-            // B. NUOVO CALCOLO DETTAGLIATO FASCE (Minuto per minuto)
+            // B. CALCOLO DETTAGLIATO FASCE (Minuto per minuto)
             let dettagli = { feriale: 0, festivo: 0, super_festivo: 0, notturno: 0 };
             
             let timeScanner = new Date(inizio);
@@ -480,6 +486,7 @@
                             </div>`;
             });
             
+            // MODIFICA RICHIESTA: Cambio Testo
             htmlRes += `<div style="margin-top:10px; border-top:1px solid #ccc; padding-top:10px; font-size:13px; color:#555;">
                         <b>SEGNA ORE AL TURNO:</b> <span class="badge bg-${turnoRientro}">${turnoRientro}</span></div>`;
             
@@ -511,19 +518,19 @@
             let html = `
                 <table class="detail-table">
                     <tr>
-                        <td class="detail-label">Feriali (06-22)</td>
+                        <td class="detail-label">Feriali (06:00-22:00)</td>
                         <td class="detail-val" style="color:var(--vvf-dark)">${d.feriale.toFixed(2)} h</td>
                     </tr>
                     <tr>
-                        <td class="detail-label">Festivi (06-22) - Solo Dom</td>
+                        <td class="detail-label">Festivi (06:00-22:00)</td>
                         <td class="detail-val" style="color:#fbc02d">${d.festivo.toFixed(2)} h</td>
                     </tr>
                     <tr>
-                        <td class="detail-label">Super Festivi (06-22)</td>
+                        <td class="detail-label">Super Festivi (06:00-22:00)</td>
                         <td class="detail-val" style="color:var(--vvf-red)">${d.super_festivo.toFixed(2)} h</td>
                     </tr>
                     <tr>
-                        <td class="detail-label">Notturne (22-06)</td>
+                        <td class="detail-label">Notturne (22:00-06:00)</td>
                         <td class="detail-val" style="color:var(--vvf-teal)">${d.notturno.toFixed(2)} h</td>
                     </tr>
                     <tr style="background:#eee;">
@@ -531,7 +538,10 @@
                         <td class="detail-val">${(d.feriale+d.festivo+d.super_festivo+d.notturno).toFixed(2)} h</td>
                     </tr>
                 </table>
-                <p style="font-size:12px; color:#888; margin-top:10px;">* I giorni Super Festivi includono Natale, Capodanno, Pasqua ecc.</p>
+                <p style="font-size:12px; color:#888; margin-top:10px;">
+                    * NOTA: Le fasce Feriali/Festive si applicano SOLO dalle 06:00 alle 22:00. <br>
+                    Tutto il resto è considerato fascia Notturna.
+                </p>
             `;
             
             document.getElementById('detail-content').innerHTML = html;
