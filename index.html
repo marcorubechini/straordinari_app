@@ -202,6 +202,21 @@
             font-size: 12px;
         }
         
+        /* LINK DI TESTO (Password Dimenticata) */
+        .text-link {
+            color: var(--vvf-grigio);
+            font-size: 11px;
+            text-decoration: underline;
+            cursor: pointer;
+            margin-top: 15px;
+            display: block;
+            text-align: right;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .text-link:hover { color: var(--vvf-rosso); }
+
         /* UI ELEMENTI */
         .login-msg { font-size: 13px; text-align: center; margin-bottom: 20px; color: var(--tech-dark); font-style: italic; }
         .error-msg { color: var(--vvf-rosso); font-size: 12px; margin-top: 5px; font-weight: bold; display: none; text-align: right; }
@@ -238,16 +253,54 @@
             font-weight: bold;
         }
         
-        /* STORICO */
+        /* STORICO & CHECKBOX TECNICA */
         .history-item { 
             border-bottom: 1px dashed var(--tech-border); 
             padding: 15px 0; 
             display: flex; flex-direction: column; gap: 8px; 
+            transition: opacity 0.3s;
         }
+        /* Stile per elemento "Visto/Verificato" */
+        .history-item.visto {
+            opacity: 0.5; /* Dimmed */
+            filter: grayscale(80%); /* Meno colore */
+        }
+        
         .history-header { display: flex; justify-content: space-between; align-items: center; }
         .history-date { font-weight: 700; color: var(--tech-dark); font-size: 14px; text-transform: uppercase; }
         .history-sub { font-size: 12px; color: #666; font-family: monospace; }
-        .history-actions { display: flex; justify-content: flex-end; gap: 10px; }
+        .history-actions { display: flex; justify-content: flex-end; gap: 10px; align-items: center; }
+        
+        /* Checkbox Custom Tecnica */
+        .check-container {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            font-size: 10px;
+            color: var(--vvf-grigio);
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        .check-box {
+            width: 16px;
+            height: 16px;
+            border: 2px solid var(--tech-border);
+            margin-right: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+        /* Quando è attivo */
+        .history-item.visto .check-box {
+            background-color: var(--vvf-verde);
+            border-color: var(--vvf-verde);
+        }
+        .history-item.visto .check-box::after {
+            content: '✔';
+            color: white;
+            font-size: 12px;
+        }
         
         .btn-delete { 
             background: none; border: none; color: var(--vvf-rosso); 
@@ -444,15 +497,34 @@
             <label>Identificativo Utente</label>
             <input type="text" id="username" placeholder="ES. MARCOROSSI" oninput="resetLoginUI()">
             
+            <!-- SEZIONE PASSWORD NORMALE -->
             <div id="password-section" class="hidden">
                 <label>Codice Sicurezza</label>
                 <input type="password" id="password" placeholder="••••••••">
+                <div class="text-link" onclick="toggleRecovery()">PASSWORD SMARRITA?</div>
             </div>
 
+            <!-- SEZIONE REGISTRAZIONE -->
             <div id="register-section" class="hidden">
-                <p style="color: var(--vvf-oro); font-size: 12px; margin-top: 15px; border: 1px dashed var(--vvf-oro); padding: 5px;">NUOVO UTENTE RILEVATO. IMPOSTA PASSWORD.</p>
+                <p style="color: var(--vvf-oro); font-size: 12px; margin-top: 15px; border: 1px dashed var(--vvf-oro); padding: 5px;">NUOVO UTENTE RILEVATO. IMPOSTA PASSWORD E PIN.</p>
+                
                 <label>Crea Password</label>
                 <input type="password" id="new-password" placeholder="SCEGLI PASSWORD">
+                
+                <label>PIN di Recupero (per ripristino)</label>
+                <input type="number" id="recovery-pin" placeholder="ES. 1234" maxlength="6">
+            </div>
+
+            <!-- SEZIONE RECUPERO PASSWORD (NASCOSTA) -->
+            <div id="recovery-section" class="hidden" style="margin-top: 20px; border-top: 1px dashed var(--vvf-grigio); padding-top: 20px;">
+                <p style="color: var(--vvf-rosso); font-weight: 700; font-size: 12px;">PROCEDURA DI RIPRISTINO CREDENZIALI</p>
+                <label>Inserisci il tuo PIN di Sicurezza</label>
+                <input type="number" id="check-recovery-pin" placeholder="PIN SALVATO IN REGISTRAZIONE">
+                
+                <label>Nuova Password</label>
+                <input type="password" id="reset-password" placeholder="NUOVA PASSWORD">
+                
+                <div class="text-link" onclick="toggleRecovery()" style="text-align: left; margin-top: 10px;">ANNULLA</div>
             </div>
 
             <p id="error-text" class="error-msg">ERRORE CREDENZIALI</p>
@@ -557,46 +629,125 @@
         }
 
         // ===============================================
-        //  2. LOGICA LOGIN
+        //  2. LOGICA LOGIN & RECOVERY (MIGLIORATA)
         // ===============================================
         let dbUtenti = JSON.parse(localStorage.getItem('vvf_users_db') || '{}');
         let currentUser = null;
-        let loginState = 'check';
+        let loginState = 'check'; // check, login, register, recovery
 
         function checkUser() {
             let userField = document.getElementById('username');
             let user = userField.value.trim();
+            let btn = document.getElementById('btn-login-action');
+            let errorText = document.getElementById('error-text');
             
             if(!user) return;
 
+            // FASE DI CONTROLLO INIZIALE
             if (loginState === 'check') {
                 if (dbUtenti.hasOwnProperty(user)) {
+                    // Utente Esiste -> Login
                     document.getElementById('password-section').classList.remove('hidden');
-                    document.getElementById('btn-login-action').innerText = "ACCESSO";
+                    btn.innerText = "ACCESSO";
                     loginState = 'login';
                     userField.disabled = true;
                 } else {
+                    // Utente Nuovo -> Registrazione
                     document.getElementById('register-section').classList.remove('hidden');
-                    document.getElementById('btn-login-action').innerText = "REGISTRAZIONE";
+                    btn.innerText = "REGISTRAZIONE";
                     loginState = 'register';
                     userField.disabled = true;
                 }
-            } else if (loginState === 'login') {
-                if (dbUtenti[user] === document.getElementById('password').value) avviaApp(user);
-                else { document.getElementById('error-text').style.display = 'block'; }
-            } else if (loginState === 'register') {
+                return;
+            } 
+            
+            // FASE DI LOGIN
+            else if (loginState === 'login') {
+                let pass = document.getElementById('password').value;
+                
+                // Supporto vecchi utenti (stringa) e nuovi utenti (oggetto)
+                let storedData = dbUtenti[user];
+                let storedPass = (typeof storedData === 'string') ? storedData : storedData.password;
+
+                if (storedPass === pass) {
+                    avviaApp(user);
+                } else { 
+                    errorText.innerText = "PASSWORD ERRATA";
+                    errorText.style.display = 'block'; 
+                }
+            } 
+            
+            // FASE DI REGISTRAZIONE
+            else if (loginState === 'register') {
                 let newPass = document.getElementById('new-password').value;
-                if (newPass) {
-                    dbUtenti[user] = newPass;
+                let pin = document.getElementById('recovery-pin').value;
+
+                if (newPass && pin) {
+                    // Salvataggio come Oggetto {password, pin}
+                    dbUtenti[user] = { password: newPass, pin: pin };
                     localStorage.setItem('vvf_users_db', JSON.stringify(dbUtenti));
                     avviaApp(user);
+                } else {
+                    alert("Inserisci sia la Password che il PIN di recupero.");
                 }
+            }
+
+            // FASE DI RECUPERO
+            else if (loginState === 'recovery') {
+                let pinInput = document.getElementById('check-recovery-pin').value;
+                let newPassInput = document.getElementById('reset-password').value;
+                
+                let storedData = dbUtenti[user];
+                
+                // Verifica se l'utente ha un PIN salvato (nuovo sistema)
+                if (typeof storedData === 'object' && storedData.pin) {
+                    if (storedData.pin === pinInput) {
+                        // PIN Corretto -> Aggiorna Password
+                        if(newPassInput.length > 0) {
+                            dbUtenti[user].password = newPassInput;
+                            localStorage.setItem('vvf_users_db', JSON.stringify(dbUtenti));
+                            alert("Password aggiornata con successo! Effettua il login.");
+                            location.reload(); // Ricarica per login pulito
+                        } else {
+                            alert("Inserisci una nuova password valida.");
+                        }
+                    } else {
+                        alert("PIN di Sicurezza Errato.");
+                    }
+                } else {
+                    alert("Questo utente non ha un PIN di recupero impostato (vecchio account). Contatta l'amministratore o cancella la cache per resettare.");
+                }
+            }
+        }
+
+        // Gestione UI per Recupero Password
+        function toggleRecovery() {
+            let passSection = document.getElementById('password-section');
+            let recSection = document.getElementById('recovery-section');
+            let btn = document.getElementById('btn-login-action');
+            let errorText = document.getElementById('error-text');
+
+            errorText.style.display = 'none';
+
+            if (loginState === 'login') {
+                // Passa a Recovery
+                passSection.classList.add('hidden');
+                recSection.classList.remove('hidden');
+                btn.innerText = "RIPRISTINA PASSWORD";
+                loginState = 'recovery';
+            } else {
+                // Torna a Login
+                passSection.classList.remove('hidden');
+                recSection.classList.add('hidden');
+                btn.innerText = "ACCESSO";
+                loginState = 'login';
             }
         }
 
         function resetLoginUI() {
             document.getElementById('password-section').classList.add('hidden');
             document.getElementById('register-section').classList.add('hidden');
+            document.getElementById('recovery-section').classList.add('hidden');
             document.getElementById('btn-login-action').innerText = "PROCEDI";
             document.getElementById('error-text').style.display = 'none';
             loginState = 'check';
@@ -731,7 +882,8 @@
                 rientro: turnoRientro,
                 segmenti: segmenti,
                 dettagli: dettagli,
-                note: note
+                note: note,
+                visto: false // Inizializza non visto
             };
             salvaRecord(record);
 
@@ -852,6 +1004,20 @@
             caricaStorico();
         }
 
+        // FUNZIONE PER GESTIRE LA SPUNTA DI "VISTO"
+        function toggleVisto(id) {
+            let key = getHistoryKey();
+            let list = JSON.parse(localStorage.getItem(key) || '[]');
+            
+            // Trova l'elemento e inverte lo stato
+            let itemIndex = list.findIndex(x => x.id === id);
+            if (itemIndex !== -1) {
+                list[itemIndex].visto = !list[itemIndex].visto; // Inverte true/false
+                localStorage.setItem(key, JSON.stringify(list));
+                caricaStorico(); // Ricarica la lista per mostrare le modifiche
+            }
+        }
+
         function caricaStorico() {
             let list = JSON.parse(localStorage.getItem(getHistoryKey()) || '[]');
             let container = document.getElementById('lista-storico');
@@ -864,10 +1030,20 @@
                 let dFin = new Date(item.fine);
                 let dataStr = dIniz.toLocaleDateString('it-IT', {day:'numeric', month:'short'}).toUpperCase();
                 
+                // Classe aggiuntiva se è "visto"
+                let vistoClass = item.visto ? 'visto' : '';
+                
                 html += `
-                <div class="history-item">
+                <div class="history-item ${vistoClass}">
                     <div class="history-header">
                         <span class="history-date">${dataStr}</span>
+                        
+                        <!-- CHECKBOX DI VERIFICA -->
+                        <div class="check-container" onclick="toggleVisto(${item.id})">
+                            <div class="check-box"></div>
+                            <span>VERIFICATO</span>
+                        </div>
+
                         <span class="badge bg-${item.rientro}" style="transform:scale(0.8)">${item.rientro}</span>
                     </div>
                     <div class="history-sub">
