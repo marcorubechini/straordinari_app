@@ -47,17 +47,19 @@
             height: 80px;
             margin: 0 auto 10px auto;
             border-radius: 50%;
-            background: var(--vvf-dark);
+            /* background: var(--vvf-dark); Rimosso sfondo scuro per il nuovo logo */
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            background-color: #fff; /* Sfondo bianco per il nuovo logo */
+            padding: 5px; /* Spazio per il logo */
         }
         
         .logo-img {
-            width: 50px;
-            height: auto;
-            filter: grayscale(100%) brightness(200%); 
+            width: auto;
+            height: 60px; /* Altezza fissa per il logo */
+            /* filter: grayscale(100%) brightness(200%); Rimosso filtro */
         }
 
         .header h1 { color: var(--vvf-red); margin: 0; font-size: 28px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; }
@@ -129,10 +131,23 @@
         .history-item { 
             border-bottom: 1px solid #eee; 
             padding: 15px 0; 
-            position: relative;
+            /* position: relative; Rimosso */
+            display: flex; /* Flexbox per il layout */
+            flex-direction: column; /* Elementi in colonna */
+            gap: 10px; /* Spazio tra gli elementi */
+        }
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
         .history-date { font-weight: 800; color: var(--vvf-dark); font-size: 15px; }
-        .history-sub { font-size: 13px; color: #666; margin-top: 4px; }
+        .history-sub { font-size: 13px; color: #666; }
+        .history-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
         
         .info-turno-box {
             background: white; 
@@ -161,8 +176,11 @@
     <!-- LOGO GLOBALE -->
     <div style="text-align: center; margin-top: 20px;">
         <div class="logo-container">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/b/b5/Stemma_Vigili_del_Fuoco.svg" class="logo-img" alt="Logo VVF">
+            <!-- Sostituito con un'immagine segnaposto per la Balzana, siccome non posso caricare file -->
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e5/Coat_of_arms_of_Siena.svg/180px-Coat_of_arms_of_Siena.svg.png" class="logo-img" alt="Balzana di Siena" title="Balzana di Siena (Immagine segnaposto, non specifica con n.78)">
         </div>
+        <!-- Nota per l'utente -->
+        <p style="font-size: 12px; color: #666; margin-top: 5px;">(Immagine segnaposto per Balzana di Siena)</p>
     </div>
 
     <!-- SCHERMATA LOGIN -->
@@ -266,8 +284,7 @@
         // Sequenza: C (08-20), B (20-08), D (08-20), C (20-08), A (08-20), D (20-08), B (08-20), A (20-08)
         const sequenzaTurni = ['C', 'B', 'D', 'C', 'A', 'D', 'B', 'A']; 
         
-        // PUNTO ZERO AGGIORNATO: 1 Dicembre 2025 ore 08:00 = TURNO C (Indice 0)
-        // Questo garantisce che oggi 1 Dicembre 2025 sia C (Giorno) e poi B (Notte).
+        // PUNTO ZERO: 1 Dicembre 2025 ore 08:00 = TURNO C (Indice 0)
         const dataAncora = new Date(2025, 11, 1, 8, 0, 0); // 11 = Dicembre
 
         // LISTA GIORNI SUPER FESTIVI (Giorno/Mese)
@@ -379,7 +396,6 @@
         }
 
         // Funzione helper per categorizzare un timestamp specifico
-        // RISPETTA RIGOROSAMENTE LE FASCE: 06:00 - 22:00
         function getCategoriaOraria(dateObj) {
             let h = dateObj.getHours();
             let d = dateObj.getDate();
@@ -387,14 +403,14 @@
             let keyDate = `${d}/${m}`;
             let dayOfWeek = dateObj.getDay(); // 0 = Domenica, 6 = Sabato
 
-            // 1. REGOLA D'ORO: Se non siamo tra le 06:00 e le 22:00, è Notturno/Straordinario Notturno
+            // 1. REGOLA D'ORO: Se non siamo tra le 06:00 e le 22:00, è Notturno
             if (h < 6 || h >= 22) {
                 return 'notturno';
             }
 
             // SE SIAMO QUI, SIAMO CERTAMENTE TRA LE 06:00 E LE 22:00
             
-            // 2. Controllo Super Festivi (Priorità alta)
+            // 2. Controllo Super Festivi
             if (superFestiviFissi.includes(keyDate) || isPasquaOPasquetta(dateObj)) {
                 return 'super_festivo';
             }
@@ -404,7 +420,7 @@
                 return 'festivo';
             }
 
-            // 4. Tutto il resto (Lun-Sab tra le 06 e le 22) è Feriale Diurno
+            // 4. Tutto il resto è Feriale Diurno
             return 'feriale';
         }
 
@@ -486,7 +502,6 @@
                             </div>`;
             });
             
-            // MODIFICA RICHIESTA: Cambio Testo
             htmlRes += `<div style="margin-top:10px; border-top:1px solid #ccc; padding-top:10px; font-size:13px; color:#555;">
                         <b>SEGNA ORE AL TURNO:</b> <span class="badge bg-${turnoRientro}">${turnoRientro}</span></div>`;
             
@@ -514,28 +529,35 @@
             }
         }
 
+        // FUNZIONE PER CONVERTIRE ORE DECIMALI IN ORE E MINUTI
+        function formattaOreMinuti(oreDecimali) {
+            let ore = Math.floor(oreDecimali);
+            let minuti = Math.round((oreDecimali - ore) * 60);
+            return `${ore}h ${String(minuti).padStart(2, '0')}m`;
+        }
+
         function renderizzaDettagli(d) {
             let html = `
                 <table class="detail-table">
                     <tr>
                         <td class="detail-label">Feriali (06:00-22:00)</td>
-                        <td class="detail-val" style="color:var(--vvf-dark)">${d.feriale.toFixed(2)} h</td>
+                        <td class="detail-val" style="color:var(--vvf-dark)">${formattaOreMinuti(d.feriale)}</td>
                     </tr>
                     <tr>
                         <td class="detail-label">Festivi (06:00-22:00)</td>
-                        <td class="detail-val" style="color:#fbc02d">${d.festivo.toFixed(2)} h</td>
+                        <td class="detail-val" style="color:#fbc02d">${formattaOreMinuti(d.festivo)}</td>
                     </tr>
                     <tr>
                         <td class="detail-label">Super Festivi (06:00-22:00)</td>
-                        <td class="detail-val" style="color:var(--vvf-red)">${d.super_festivo.toFixed(2)} h</td>
+                        <td class="detail-val" style="color:var(--vvf-red)">${formattaOreMinuti(d.super_festivo)}</td>
                     </tr>
                     <tr>
                         <td class="detail-label">Notturne (22:00-06:00)</td>
-                        <td class="detail-val" style="color:var(--vvf-teal)">${d.notturno.toFixed(2)} h</td>
+                        <td class="detail-val" style="color:var(--vvf-teal)">${formattaOreMinuti(d.notturno)}</td>
                     </tr>
                     <tr style="background:#eee;">
                         <td>TOTALE</td>
-                        <td class="detail-val">${(d.feriale+d.festivo+d.super_festivo+d.notturno).toFixed(2)} h</td>
+                        <td class="detail-val">${formattaOreMinuti(d.feriale+d.festivo+d.super_festivo+d.notturno)}</td>
                     </tr>
                 </table>
                 <p style="font-size:12px; color:#888; margin-top:10px;">
@@ -582,16 +604,16 @@
                 
                 html += `
                 <div class="history-item">
-                    <div style="display:flex; justify-content:space-between;">
+                    <div class="history-header">
                         <span class="history-date">${dataStr}</span>
-                        <span class="badge bg-${item.rientro}" style="transform:scale(0.8)">${item.rientro}</span>
+                        <span class="badge bg-${item.rientro}" style="transform:scale(0.9)">${item.rientro}</span>
                     </div>
                     <div class="history-sub">
                         <strong>${item.tipo}</strong>: ${item.totale}h <br>
                     </div>
-                    <div style="margin-top:5px;">
-                        <button class="ghost" style="padding:5px; width:auto; font-size:12px; margin:0;" onclick="mostraDettaglioDaStorico(${item.id})">Dettagli Fasce</button>
-                        <button class="btn-delete" style="float:right; margin-top:5px;" onclick="eliminaRecord(${item.id})">Elimina</button>
+                    <div class="history-actions">
+                        <button class="ghost" style="padding:5px 10px; width:auto; font-size:12px; margin:0;" onclick="mostraDettaglioDaStorico(${item.id})">Dettagli</button>
+                        <button class="btn-delete" style="margin:0; font-size:12px;" onclick="eliminaRecord(${item.id})">Elimina</button>
                     </div>
                 </div>`;
             });
