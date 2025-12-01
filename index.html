@@ -1,10 +1,191 @@
-<script>
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Turnario VVF Smart</title>
+    <style>
+        /* --- CONFIGURAZIONE COLORI VVF --- */
+        :root {
+            --vvf-red: #ce3824;
+            --vvf-dark: #060611;
+            --vvf-teal: #308e89;
+            --vvf-gray: #bac9d0;
+            --vvf-bg: #f4f7f9;
+        }
+
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
+            background-color: var(--vvf-bg); 
+            margin: 0; 
+            padding: 20px 15px; 
+            color: var(--vvf-dark);
+            -webkit-font-smoothing: antialiased;
+        }
+        
+        /* CARD E LAYOUT */
+        .card { 
+            background: white; 
+            padding: 25px 20px; 
+            border-radius: 16px; 
+            box-shadow: 0 4px 20px rgba(0,0,0,0.06); 
+            margin-bottom: 25px; 
+            border: 1px solid rgba(0,0,0,0.05); 
+        }
+        
+        .header { text-align: center; margin-bottom: 20px; }
+        .header h1 { color: var(--vvf-red); margin: 0; font-size: 26px; font-weight: 800; }
+        .header p { color: var(--vvf-teal); font-size: 14px; margin-top: 5px; font-weight: 600; }
+
+        /* INPUT STYLE */
+        label { font-weight: 700; font-size: 13px; display: block; margin-top: 18px; color: var(--vvf-dark); text-transform: uppercase; letter-spacing: 0.5px; }
+        
+        input, select, textarea { 
+            width: 100%; 
+            padding: 14px; 
+            margin-top: 8px; 
+            border: 2px solid var(--vvf-gray); 
+            border-radius: 10px; 
+            font-size: 16px; 
+            background: #fff;
+            box-sizing: border-box; 
+            transition: border-color 0.3s;
+        }
+        input:focus, select:focus, textarea:focus { 
+            outline: none; 
+            border-color: var(--vvf-teal); 
+        }
+        
+        /* BOTTONI */
+        button { 
+            background-color: var(--vvf-red); 
+            color: white; 
+            border: none; 
+            padding: 18px; 
+            width: 100%; 
+            border-radius: 12px; 
+            font-size: 16px; 
+            font-weight: 800; 
+            cursor: pointer; 
+            margin-top: 25px; 
+            box-shadow: 0 4px 10px rgba(206, 56, 36, 0.3);
+        }
+        button:active { transform: scale(0.98); }
+        button.secondary { background-color: var(--vvf-teal); box-shadow: none; margin-top: 10px; }
+        button.ghost { background-color: transparent; color: #666; border: 1px solid #ccc; box-shadow: none; margin-top: 10px; padding: 12px; font-size: 14px; }
+        
+        /* LOGIN FLOW */
+        .login-msg { font-size: 14px; text-align: center; margin-bottom: 15px; color: #666; }
+        .error-msg { color: #d32f2f; font-size: 13px; margin-top: 5px; font-weight: bold; display: none; }
+
+        /* BADGES TURNI */
+        .badge { display: inline-block; padding: 4px 10px; border-radius: 6px; color: white; font-weight: bold; font-size: 0.9em; min-width: 30px; text-align: center; }
+        .bg-A { background-color: #d32f2f; } /* Rosso */
+        .bg-B { background-color: #2e7d32; } /* Verde Scuro */
+        .bg-C { background-color: #1565c0; } /* Blu */
+        .bg-D { background-color: #f9a825; color: black; } /* Giallo Scuro */
+
+        /* RISULTATI */
+        .result-box { background-color: #e0f2f1; border-left: 5px solid var(--vvf-teal); padding: 15px; border-radius: 8px; margin-top: 20px; display: none; }
+        
+        /* STORICO */
+        .history-item { 
+            border-bottom: 1px solid #eee; 
+            padding: 15px 0; 
+            position: relative;
+        }
+        .history-date { font-weight: 800; color: var(--vvf-dark); font-size: 15px; }
+        .history-sub { font-size: 13px; color: #666; margin-top: 4px; }
+        .history-turn { position: absolute; top: 15px; right: 0; }
+        .btn-delete { 
+            background: none; border: none; color: #d32f2f; 
+            padding: 0; margin: 5px 0 0 0; width: auto; 
+            font-size: 12px; font-weight: 600; box-shadow: none; 
+            text-decoration: underline; cursor: pointer;
+        }
+
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <div id="view-login">
+        <div class="header" style="margin-top: 40px;">
+            <h1>🚒 VVF Mobile</h1>
+            <p>Gestionale Turni & Straordinari</p>
+        </div>
+
+        <div class="card">
+            <p class="login-msg" id="login-intro">Inserisci il tuo Nome Utente per iniziare</p>
+            
+            <label>Nome Utente</label>
+            <input type="text" id="username" placeholder="Es. MarcoRossi" oninput="resetLoginUI()">
+            
+            <div id="password-section" class="hidden">
+                <label>Password</label>
+                <input type="password" id="password" placeholder="Inserisci password">
+            </div>
+
+            <div id="register-section" class="hidden">
+                <p style="color: var(--vvf-teal); font-size: 13px; margin-top: 15px;">👋 Benvenuto! Crea una password per il tuo nuovo account.</p>
+                <label>Crea Password</label>
+                <input type="password" id="new-password" placeholder="Scegli una password">
+            </div>
+
+            <p id="error-text" class="error-msg">Errore credenziali</p>
+
+            <button id="btn-login-action" onclick="checkUser()">AVANTI</button>
+        </div>
+    </div>
+
+    <div id="view-app" class="hidden">
+        <div class="header">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <h1 style="font-size: 20px;">Registro Attività</h1>
+                <span id="user-badge" style="background:#eee; padding:5px 10px; border-radius:20px; font-size:12px; font-weight:bold;">User</span>
+            </div>
+            <div style="background: white; padding: 10px; border-radius: 10px; margin-top: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center;">
+                <span style="font-weight: 600; color: #555;">Oggi (Real-time):</span>
+                <span id="oggi-turno-badge">...</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <label>Tipo Attività</label>
+            <select id="tipo">
+                <option value="Soccorso">🔥 Straordinario SOCCORSO</option>
+                <option value="Guida">🚒 Ore di GUIDA</option>
+            </select>
+
+            <label>Inizio Servizio</label>
+            <input type="datetime-local" id="inizio">
+
+            <label>Fine Servizio</label>
+            <input type="datetime-local" id="fine">
+
+            <label>Note</label>
+            <textarea id="note" rows="2" placeholder="Dettagli intervento..."></textarea>
+
+            <button onclick="calcolaESalva()">REGISTRA E CALCOLA</button>
+
+            <div id="risultato-box" class="result-box"></div>
+        </div>
+
+        <div class="card">
+            <h3 style="color: var(--vvf-dark); margin-top:0;">Archivio Storico</h3>
+            <div id="lista-storico"></div>
+            <button class="ghost" onclick="resetStorico()">Svuota Storico</button>
+        </div>
+
+        <button class="ghost" onclick="logout()">Esci</button>
+    </div>
+
+    <script>
         // ===============================================
-        //  1. CONFIGURAZIONE MATEMATICA TURNI (CORRETTA AL 100%)
+        //  1. CONFIGURAZIONE MATEMATICA TURNI (CORRETTA)
         // ===============================================
         
-        // Sequenza ciclica di 8 turni (12 ore ciascuno)
-        // Corrispondenza: Giorno C -> Notte B -> Giorno D -> Notte C -> Giorno A -> Notte D -> Giorno B -> Notte A
+        // Sequenza ciclica di 8 turni
         const sequenzaTurni = ['C', 'B', 'D', 'C', 'A', 'D', 'B', 'A'];
         
         // PUNTO ZERO ASSOLUTO: 1 Dicembre 2025 ore 08:00 = INIZIO TURNO C
@@ -12,29 +193,31 @@
         const dataAncora = new Date(2025, 11, 1, 8, 0, 0); 
 
         function getTurno(dataOggetto) {
-            // Calcola la differenza in millisecondi dall'ancora (1 Dic 2025)
+            // Differenza in ore dall'ancora
             let diffMs = dataOggetto.getTime() - dataAncora.getTime();
-            
-            // Convertiamo in ore
             let oreDiff = diffMs / (1000 * 60 * 60);
             
-            // Ogni turno dura 12 ore esatte
-            // Math.floor gestisce correttamente i numeri negativi se guardiamo date passate
+            // Ogni turno dura 12 ore. Math.floor gestisce anche tempi passati (negativi)
             let blocchiPassati = Math.floor(oreDiff / 12);
             
-            // Calcolo indice ciclico (operatore modulo % 8)
-            // ((n % 8) + 8) % 8 serve a gestire correttamente i numeri negativi (date prima del 1 dic)
+            // Modulo ciclico per indice array
             let indice = ((blocchiPassati % 8) + 8) % 8;
-            
             return sequenzaTurni[indice];
         }
 
         // ===============================================
-        //  2. SISTEMA DI LOGIN "INTELLIGENTE"
+        //  2. SISTEMA DI LOGIN
         // ===============================================
-        let dbUtenti = JSON.parse(localStorage.getItem('vvf_users_db') || '{}');
+        let dbUtenti = {};
+        try {
+            dbUtenti = JSON.parse(localStorage.getItem('vvf_users_db') || '{}');
+        } catch(e) {
+            console.error("Errore lettura DB locale", e);
+            dbUtenti = {};
+        }
+
         let currentUser = null;
-        let loginState = 'check'; // check, login, register
+        let loginState = 'check'; 
 
         function checkUser() {
             let userField = document.getElementById('username');
@@ -96,7 +279,7 @@
             aggiornaTurnoOggi();
             caricaStorico();
             
-            // Aggiorna ogni minuto per cambiare turno in real-time se l'app resta aperta
+            // Aggiorna ogni minuto
             setInterval(aggiornaTurnoOggi, 60000);
         }
 
@@ -105,13 +288,12 @@
         }
 
         // ===============================================
-        //  3. LOGICA APP E CALCOLO
+        //  3. LOGICA CALCOLO
         // ===============================================
 
         function aggiornaTurnoOggi() {
             let now = new Date();
             let turno = getTurno(now);
-            
             document.getElementById('oggi-turno-badge').innerHTML = 
                 `<span class="badge bg-${turno}" style="font-size:1.2em;">TURNO ${turno}</span>`;
         }
@@ -140,12 +322,12 @@
                 let prossimoCambio = new Date(cursore);
                 let ora = cursore.getHours();
 
-                // Cambio turno alle 08:00 e alle 20:00
+                // Cambio turno: 08:00 e 20:00
                 if (ora >= 8 && ora < 20) {
-                    prossimoCambio.setHours(20, 0, 0, 0); // Fine turno diurno
+                    prossimoCambio.setHours(20, 0, 0, 0); 
                 } else {
                     if (ora >= 20) prossimoCambio.setDate(prossimoCambio.getDate() + 1);
-                    prossimoCambio.setHours(8, 0, 0, 0); // Fine turno notturno
+                    prossimoCambio.setHours(8, 0, 0, 0); 
                 }
 
                 let fineSegmento = (prossimoCambio < fine) ? prossimoCambio : fine;
@@ -222,7 +404,6 @@
                 
                 let dataStr = dIniz.toLocaleDateString('it-IT', {day:'numeric', month:'short'});
                 let oraStr = `${dIniz.getHours()}:${String(dIniz.getMinutes()).padStart(2,'0')} - ${dFin.getHours()}:${String(dFin.getMinutes()).padStart(2,'0')}`;
-
                 let dettagliHtml = item.segmenti.map(s => `${s.ore.toFixed(1)}h(${s.turno})`).join('+');
 
                 html += `
@@ -257,3 +438,5 @@
             }
         }
     </script>
+</body>
+</html>
