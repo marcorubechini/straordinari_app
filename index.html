@@ -3,19 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Turnario VVF Smart</title>
+    <title>VVF Smart - Turnario & Ore</title>
+    
+    <!-- FONT EXO 2 (GOOGLE FONTS) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Exo+2:ital,wght@0,300;0,400;0,600;0,800;1,400&display=swap" rel="stylesheet">
+
     <style>
-        /* --- CONFIGURAZIONE COLORI VVF --- */
+        /* --- CONFIGURAZIONE COLORI & FONT --- */
         :root {
             --vvf-red: #ce3824;
-            --vvf-dark: #060611;
+            --vvf-dark: #1a1a2e;
             --vvf-teal: #308e89;
             --vvf-gray: #bac9d0;
-            --vvf-bg: #f4f7f9;
+            --vvf-bg: #f0f2f5;
         }
 
         body { 
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
+            font-family: 'Exo 2', sans-serif;
             background-color: var(--vvf-bg); 
             margin: 0; 
             padding: 20px 15px; 
@@ -33,8 +39,28 @@
             border: 1px solid rgba(0,0,0,0.05); 
         }
         
-        .header { text-align: center; margin-bottom: 20px; }
-        .header h1 { color: var(--vvf-red); margin: 0; font-size: 26px; font-weight: 800; }
+        .header { text-align: center; margin-bottom: 25px; position: relative; }
+        
+        /* LOGO STYLE */
+        .logo-container {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 10px auto;
+            border-radius: 50%;
+            background: var(--vvf-dark);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+        
+        .logo-img {
+            width: 50px;
+            height: auto;
+            filter: grayscale(100%) brightness(200%); 
+        }
+
+        .header h1 { color: var(--vvf-red); margin: 0; font-size: 28px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; }
         .header p { color: var(--vvf-teal); font-size: 14px; margin-top: 5px; font-weight: 600; }
 
         /* INPUT STYLE */
@@ -47,8 +73,9 @@
             border: 2px solid var(--vvf-gray); 
             border-radius: 10px; 
             font-size: 16px; 
+            font-family: 'Exo 2', sans-serif;
             background: #fff;
-            box-sizing: border-box; /* Fix padding issues */
+            box-sizing: border-box;
             transition: border-color 0.3s;
         }
         input:focus, select:focus, textarea:focus { 
@@ -61,24 +88,24 @@
             background-color: var(--vvf-red); 
             color: white; 
             border: none; 
-            padding: 18px; 
+            padding: 16px; 
             width: 100%; 
             border-radius: 12px; 
             font-size: 16px; 
-            font-weight: 800; 
+            font-weight: 700; 
             cursor: pointer; 
-            margin-top: 25px; 
+            margin-top: 20px; 
             box-shadow: 0 4px 10px rgba(206, 56, 36, 0.3);
+            text-transform: uppercase;
         }
         button:active { transform: scale(0.98); }
         button.secondary { background-color: var(--vvf-teal); box-shadow: none; margin-top: 10px; }
-        button.ghost { background-color: transparent; color: #666; border: 1px solid #ccc; box-shadow: none; margin-top: 10px; padding: 12px; font-size: 14px; }
+        button.ghost { background-color: transparent; color: #666; border: 1px solid #ccc; box-shadow: none; margin-top: 10px; padding: 12px; font-size: 14px; text-transform: none; }
         
-        /* LOGIN FLOW */
+        /* UI ELEMENTI */
         .login-msg { font-size: 14px; text-align: center; margin-bottom: 15px; color: #666; }
         .error-msg { color: #d32f2f; font-size: 13px; margin-top: 5px; font-weight: bold; display: none; }
 
-        /* BADGES TURNI */
         .badge { 
             display: inline-flex; 
             align-items: center;
@@ -92,15 +119,13 @@
             text-align: center; 
             box-shadow: 0 2px 5px rgba(0,0,0,0.2);
         }
-        .bg-A { background-color: #d32f2f; } /* Rosso */
-        .bg-B { background-color: #2e7d32; } /* Verde Scuro */
-        .bg-C { background-color: #1565c0; } /* Blu */
-        .bg-D { background-color: #fbc02d; color: #333; } /* Giallo */
+        .bg-A { background-color: #d32f2f; }
+        .bg-B { background-color: #2e7d32; }
+        .bg-C { background-color: #1565c0; }
+        .bg-D { background-color: #fbc02d; color: #333; }
 
-        /* RISULTATI */
         .result-box { background-color: #e0f2f1; border-left: 5px solid var(--vvf-teal); padding: 15px; border-radius: 8px; margin-top: 20px; display: none; }
         
-        /* STORICO */
         .history-item { 
             border-bottom: 1px solid #eee; 
             padding: 15px 0; 
@@ -108,17 +133,7 @@
         }
         .history-date { font-weight: 800; color: var(--vvf-dark); font-size: 15px; }
         .history-sub { font-size: 13px; color: #666; margin-top: 4px; }
-        .history-turn { position: absolute; top: 15px; right: 0; }
-        .btn-delete { 
-            background: none; border: none; color: #d32f2f; 
-            padding: 0; margin: 5px 0 0 0; width: auto; 
-            font-size: 12px; font-weight: 600; box-shadow: none; 
-            text-decoration: underline; cursor: pointer;
-        }
-
-        .hidden { display: none !important; }
         
-        /* INFO BANNER */
         .info-turno-box {
             background: white; 
             padding: 15px; 
@@ -130,32 +145,48 @@
             align-items: center;
             border-left: 4px solid var(--vvf-red);
         }
+
+        /* TABELLA DETTAGLI */
+        .detail-table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        .detail-table td { padding: 8px; border-bottom: 1px solid #eee; font-size: 14px; }
+        .detail-table tr:last-child td { border-bottom: none; font-weight: bold; }
+        .detail-label { color: #666; }
+        .detail-val { text-align: right; color: var(--vvf-dark); font-weight: 700; }
+
+        .hidden { display: none !important; }
     </style>
 </head>
 <body>
 
+    <!-- LOGO GLOBALE -->
+    <div style="text-align: center; margin-top: 20px;">
+        <div class="logo-container">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/b/b5/Stemma_Vigili_del_Fuoco.svg" class="logo-img" alt="Logo VVF">
+        </div>
+    </div>
+
     <!-- SCHERMATA LOGIN -->
     <div id="view-login">
-        <div class="header" style="margin-top: 40px;">
-            <h1>🚒 VVF Mobile</h1>
-            <p>Gestionale Turni & Straordinari</p>
+        <div class="header">
+            <h1>VVF Mobile</h1>
+            <p>Gestionale Operativo</p>
         </div>
 
         <div class="card">
-            <p class="login-msg" id="login-intro">Inserisci il tuo Nome Utente per iniziare</p>
+            <p class="login-msg" id="login-intro">Identificativo Utente</p>
             
             <label>Nome Utente</label>
-            <input type="text" id="username" placeholder="Es. MarcoRossi" oninput="resetLoginUI()">
+            <input type="text" id="username" placeholder="Es. MarioRossi" oninput="resetLoginUI()">
             
             <div id="password-section" class="hidden">
                 <label>Password</label>
-                <input type="password" id="password" placeholder="Inserisci password">
+                <input type="password" id="password" placeholder="••••••••">
             </div>
 
             <div id="register-section" class="hidden">
-                <p style="color: var(--vvf-teal); font-size: 13px; margin-top: 15px;">👋 Benvenuto! Crea una password per il tuo nuovo account.</p>
+                <p style="color: var(--vvf-teal); font-size: 13px; margin-top: 15px;">Nuovo utente rilevato. Imposta password.</p>
                 <label>Crea Password</label>
-                <input type="password" id="new-password" placeholder="Scegli una password">
+                <input type="password" id="new-password" placeholder="Scegli password">
             </div>
 
             <p id="error-text" class="error-msg">Errore credenziali</p>
@@ -168,110 +199,94 @@
     <div id="view-app" class="hidden">
         <div class="header">
             <div style="display:flex; justify-content:space-between; align-items:center;">
-                <h1 style="font-size: 20px;">Registro Attività</h1>
-                <span id="user-badge" style="background:#eee; padding:5px 10px; border-radius:20px; font-size:12px; font-weight:bold; color: #555;">User</span>
+                <h1 style="font-size: 20px;">Registro Ore</h1>
+                <span id="user-badge" style="background:#ddd; padding:4px 10px; border-radius:20px; font-size:11px; font-weight:bold; color: #555;">USER</span>
             </div>
             
             <div class="info-turno-box">
                 <div>
-                    <span style="font-size: 12px; color: #888; display:block;">ADESSO IN SERVIZIO</span>
-                    <strong id="orario-live" style="font-size: 14px;">--:--</strong>
+                    <strong id="data-live" style="font-size: 16px; color: var(--vvf-dark); text-transform: capitalize;">-- -- ----</strong>
+                    <span style="font-size: 12px; color: #888; display:block; margin-top:2px;">In Servizio ore <span id="orario-live">--:--</span></span>
                 </div>
-                <div id="oggi-turno-badge">
-                    ...
-                </div>
+                <div id="oggi-turno-badge">...</div>
             </div>
         </div>
 
         <div class="card">
-            <label>Tipo Attività</label>
+            <label>Attività</label>
             <select id="tipo">
                 <option value="Soccorso">🔥 Straordinario SOCCORSO</option>
                 <option value="Guida">🚒 Ore di GUIDA</option>
                 <option value="Boschivo">🌲 AIB / Boschivo</option>
             </select>
 
-            <label>Inizio Servizio</label>
+            <label>Inizio</label>
             <input type="datetime-local" id="inizio">
 
-            <label>Fine Servizio</label>
+            <label>Fine</label>
             <input type="datetime-local" id="fine">
 
-            <label>Note</label>
-            <textarea id="note" rows="2" placeholder="Dettagli intervento..."></textarea>
+            <label>Note Operative</label>
+            <textarea id="note" rows="2" placeholder="Riferimenti intervento..."></textarea>
 
             <button onclick="calcolaESalva()">REGISTRA E CALCOLA</button>
 
             <div id="risultato-box" class="result-box"></div>
+            <button id="btn-vedi-dettaglio" class="secondary hidden" onclick="mostraDettaglioUltimo()">VEDI DETTAGLI FASCE ORARIE</button>
         </div>
 
         <div class="card">
-            <h3 style="color: var(--vvf-dark); margin-top:0;">Archivio Storico</h3>
+            <h3 style="color: var(--vvf-dark); margin-top:0;">Storico</h3>
             <div id="lista-storico"></div>
-            <button class="ghost" onclick="resetStorico()">Svuota Storico</button>
+            <button class="ghost" onclick="resetStorico()">Reset Storico</button>
         </div>
 
-        <button class="ghost" onclick="logout()">Esci</button>
+        <button class="ghost" onclick="logout()">Logout</button>
+    </div>
+
+    <!-- NUOVA SCHERMATA: DETTAGLIO CALCOLI -->
+    <div id="view-detail" class="hidden">
+        <div class="header">
+            <h1 style="font-size: 22px;">Dettaglio Fasce</h1>
+            <p>Ripartizione Ore</p>
+        </div>
+        
+        <div class="card">
+            <div id="detail-content"></div>
+            <button class="secondary" onclick="chiudiDettaglio()">CHIUDI</button>
+        </div>
     </div>
 
     <script>
         // ===============================================
-        //  1. MOTORE MATEMATICO TURNI (CORRETTO)
+        //  1. CONFIGURAZIONE TURNI
         // ===============================================
-        
-        // Sequenza ciclica: 
-        // 1 Dic Giorno=C, 1 Dic Notte=B, 2 Dic Giorno=D, 2 Dic Notte=C...
         const sequenzaTurni = ['C', 'B', 'D', 'C', 'A', 'D', 'B', 'A']; 
-        
-        // ANCORA FISSA: 1 Dicembre 2024 (Data di calibrazione)
-        // Usiamo un riferimento "Puro" a mezzanotte per contare i giorni
-        const dataAncora = new Date(2024, 11, 1, 0, 0, 0); // 11 = Dicembre
+        const dataAncora = new Date(2024, 11, 1, 8, 0, 0); // 1 Dic 2024 ore 08:00
+
+        // LISTA GIORNI SUPER FESTIVI (Giorno/Mese)
+        const superFestiviFissi = [
+            "1/1", "6/1", "25/4", "1/5", "2/6", "15/8", "1/11", "8/12", "25/12", "26/12"
+        ];
+
+        // Calcolo Pasqua
+        function isPasquaOPasquetta(date) {
+            const pasque = ["2025-04-20", "2026-04-05"]; 
+            const pasquette = ["2025-04-21", "2026-04-06"];
+            let iso = date.toISOString().split('T')[0];
+            return pasque.includes(iso) || pasquette.includes(iso);
+        }
 
         function getTurno(dataOggetto) {
-            // Clona la data per non modificarla
-            let d = new Date(dataOggetto);
-            let ora = d.getHours();
-
-            // LOGICA NOTTE (Cruciale per sincronizzazione):
-            // Il turno notturno va dalle 20:00 alle 08:00.
-            // Se sono le 04:00 del 2 Dicembre, siamo tecnicamente ancora nel turno
-            // iniziato la sera del 1 Dicembre. Quindi per il calcolo, consideriamo "ieri".
-            
-            let isNotte = false;
-
-            if (ora >= 20) {
-                // E' sera/notte del giorno corrente
-                isNotte = true;
-            } else if (ora < 8) {
-                // E' mattina presto, ma appartiene al turno notturno del giorno PRIMA
-                isNotte = true;
-                d.setDate(d.getDate() - 1); // Torno indietro di 1 giorno solare
-            }
-
-            // Calcolo giorni interi passati dall'ancora (1 Dic 2024)
-            let start = new Date(2024, 11, 1, 0, 0, 0);
-            let current = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 0, 0, 0);
-            
-            let diffTime = current.getTime() - start.getTime();
-            let diffDays = Math.round(diffTime / (1000 * 3600 * 24));
-
-            // Ogni giorno ha 2 slot nella sequenza (Giorno, Notte)
-            // Indice base = giorni * 2
-            let indiceBase = diffDays * 2;
-            
-            // Se siamo nello slot notturno, avanziamo di 1
-            if (isNotte) {
-                indiceBase += 1;
-            }
-
-            // Calcolo modulo (gestisce anche date passate/negative)
-            let indiceFinale = ((indiceBase % 8) + 8) % 8;
-            
-            return sequenzaTurni[indiceFinale];
+            let diffMs = dataOggetto.getTime() - dataAncora.getTime();
+            let diffOre = diffMs / (1000 * 60 * 60);
+            let blocchiDa12Ore = Math.floor(diffOre / 12);
+            let indice = ((blocchiDa12Ore % 8) + 8) % 8;
+            return sequenzaTurni[indice];
         }
 
         // ===============================================
-        //  2. SISTEMA DI LOGIN
+        //  2. LOGICA LOGIN
         // ===============================================
         let dbUtenti = JSON.parse(localStorage.getItem('vvf_users_db') || '{}');
         let currentUser = null;
@@ -280,41 +295,30 @@
         function checkUser() {
             let userField = document.getElementById('username');
             let user = userField.value.trim();
-            let btn = document.getElementById('btn-login-action');
-            let errorParams = document.getElementById('error-text');
-
+            
             if(!user) return;
 
             if (loginState === 'check') {
                 if (dbUtenti.hasOwnProperty(user)) {
                     document.getElementById('password-section').classList.remove('hidden');
-                    document.getElementById('login-intro').innerText = "Bentornato! Inserisci la tua password.";
-                    btn.innerText = "ACCEDI";
+                    document.getElementById('btn-login-action').innerText = "ACCEDI";
                     loginState = 'login';
                     userField.disabled = true;
                 } else {
                     document.getElementById('register-section').classList.remove('hidden');
-                    document.getElementById('login-intro').innerText = "Creazione nuovo profilo.";
-                    btn.innerText = "REGISTRATI E ENTRA";
+                    document.getElementById('btn-login-action').innerText = "REGISTRA";
                     loginState = 'register';
                     userField.disabled = true;
                 }
             } else if (loginState === 'login') {
-                let pass = document.getElementById('password').value;
-                if (dbUtenti[user] === pass) {
-                    avviaApp(user);
-                } else {
-                    errorParams.style.display = 'block';
-                    errorParams.innerText = "Password errata!";
-                }
+                if (dbUtenti[user] === document.getElementById('password').value) avviaApp(user);
+                else { document.getElementById('error-text').style.display = 'block'; }
             } else if (loginState === 'register') {
                 let newPass = document.getElementById('new-password').value;
-                if (newPass.length > 0) {
+                if (newPass) {
                     dbUtenti[user] = newPass;
                     localStorage.setItem('vvf_users_db', JSON.stringify(dbUtenti));
                     avviaApp(user);
-                } else {
-                    alert("Scegli una password!");
                 }
             }
         }
@@ -332,41 +336,70 @@
             document.getElementById('view-login').classList.add('hidden');
             document.getElementById('view-app').classList.remove('hidden');
             document.getElementById('user-badge').innerText = user;
-            
             impostaDateDefault();
             aggiornaLiveUI();
-            setInterval(aggiornaLiveUI, 60000); // Aggiorna ogni minuto
+            setInterval(aggiornaLiveUI, 60000);
             caricaStorico();
         }
 
-        function logout() {
-            location.reload();
-        }
+        function logout() { location.reload(); }
 
         // ===============================================
-        //  3. LOGICA APP E CALCOLO
+        //  3. CORE APP & NUOVO CALCOLO DETTAGLIATO
         // ===============================================
+
+        let ultimoCalcoloDettagli = null; 
 
         function aggiornaLiveUI() {
             let now = new Date();
             let turno = getTurno(now);
             
-            // Format orario
+            let opzioniData = { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' };
+            document.getElementById('data-live').innerText = now.toLocaleDateString('it-IT', opzioniData);
+            
             let ore = String(now.getHours()).padStart(2, '0');
             let min = String(now.getMinutes()).padStart(2, '0');
             document.getElementById('orario-live').innerText = `${ore}:${min}`;
 
-            // Badge Turno Attuale
             document.getElementById('oggi-turno-badge').innerHTML = 
-                `<span class="badge bg-${turno}" style="font-size:1.4em; padding:8px 16px;">TURNO ${turno}</span>`;
+                `<span class="badge bg-${turno}" style="font-size:1.4em; padding:8px 16px;">${turno}</span>`;
         }
 
         function impostaDateDefault() {
             let now = new Date();
             now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
-            let iso = now.toISOString().slice(0,16);
-            document.getElementById('inizio').value = iso;
-            document.getElementById('fine').value = iso;
+            document.getElementById('inizio').value = now.toISOString().slice(0,16);
+            document.getElementById('fine').value = now.toISOString().slice(0,16);
+        }
+
+        // Funzione helper per categorizzare un timestamp specifico
+        function getCategoriaOraria(dateObj) {
+            let h = dateObj.getHours();
+            let d = dateObj.getDate();
+            let m = dateObj.getMonth() + 1; // 1-12
+            let keyDate = `${d}/${m}`;
+            let dayOfWeek = dateObj.getDay(); // 0 = Domenica, 6 = Sabato
+
+            // 1. Controllo Orario Notturno (Prioritario)
+            if (h < 6 || h >= 22) {
+                return 'notturno';
+            }
+
+            // Siamo tra le 06:00 e le 22:00
+            
+            // 2. Controllo Super Festivi
+            if (superFestiviFissi.includes(keyDate) || isPasquaOPasquetta(dateObj)) {
+                return 'super_festivo';
+            }
+
+            // 3. Controllo Festivi (SOLO DOMENICA)
+            // NOTA: Il Sabato (dayOfWeek == 6) NON entra qui, quindi è considerato feriale.
+            if (dayOfWeek === 0) {
+                return 'festivo';
+            }
+
+            // 4. Altrimenti è Feriale Diurno (Lun-Sab)
+            return 'feriale';
         }
 
         function calcolaESalva() {
@@ -375,50 +408,70 @@
             let tipo = document.getElementById('tipo').value;
             let note = document.getElementById('note').value;
 
-            if (fine <= inizio) { alert("Attenzione: La fine deve essere dopo l'inizio."); return; }
+            if (fine <= inizio) { alert("Errore: Fine precedente all'inizio."); return; }
 
+            // A. Calcolo Segmenti Turno
             let segmenti = [];
             let cursore = new Date(inizio);
             let totaleOre = 0;
 
-            // Algoritmo di scansione temporale
             while (cursore < fine) {
                 let prossimoCambio = new Date(cursore);
                 let ora = cursore.getHours();
-
-                // Logica Cambio Turno: 08:00 e 20:00
-                if (ora >= 8 && ora < 20) {
-                    prossimoCambio.setHours(20, 0, 0, 0);
-                } else {
+                if (ora >= 8 && ora < 20) prossimoCambio.setHours(20, 0, 0, 0);
+                else {
                     if (ora >= 20) prossimoCambio.setDate(prossimoCambio.getDate() + 1);
                     prossimoCambio.setHours(8, 0, 0, 0);
                 }
-
                 let fineSegmento = (prossimoCambio < fine) ? prossimoCambio : fine;
-                let durataMs = fineSegmento - cursore;
-                let durataOre = durataMs / (1000 * 60 * 60);
+                let durataOre = (fineSegmento - cursore) / (1000 * 60 * 60);
+                let pm = new Date(cursore.getTime() + ((fineSegmento - cursore) / 2));
                 
-                // Usiamo un punto medio del segmento per determinare il turno in modo sicuro
-                let puntoMedio = new Date(cursore.getTime() + (durataMs / 2));
-                let turnoAttivo = getTurno(puntoMedio);
-
-                segmenti.push({
-                    turno: turnoAttivo,
-                    ore: durataOre
-                });
-
+                segmenti.push({ turno: getTurno(pm), ore: durataOre });
                 totaleOre += durataOre;
                 cursore = fineSegmento;
             }
 
-            // Calcolo Turno di Rientro (l'ultimo istante di lavoro)
-            let dataUltimoIstante = new Date(fine.getTime() - 1000);
-            let turnoRientro = getTurno(dataUltimoIstante);
+            // B. NUOVO CALCOLO DETTAGLIATO FASCE (Minuto per minuto)
+            let dettagli = { feriale: 0, festivo: 0, super_festivo: 0, notturno: 0 };
+            
+            let timeScanner = new Date(inizio);
+            timeScanner.setSeconds(0,0); 
 
-            // 1. Mostra risultato immediato
+            let fineMs = fine.getTime();
+            let currentMs = timeScanner.getTime();
+            
+            while(currentMs < fineMs) {
+                let tempDate = new Date(currentMs);
+                let cat = getCategoriaOraria(tempDate);
+                dettagli[cat] += (1/60);
+                currentMs += 60000;
+            }
+
+            let turnoRientro = getTurno(new Date(fine.getTime() - 1000));
+
+            ultimoCalcoloDettagli = dettagli;
+
+            let record = {
+                id: Date.now(),
+                tipo: tipo,
+                inizio: inizio.toISOString(),
+                fine: fine.toISOString(),
+                totale: totaleOre.toFixed(2),
+                rientro: turnoRientro,
+                segmenti: segmenti,
+                dettagli: dettagli,
+                note: note
+            };
+            salvaRecord(record);
+
+            mostraRisultatoBox(totaleOre, segmenti, turnoRientro);
+        }
+
+        function mostraRisultatoBox(totale, segmenti, turnoRientro) {
             let htmlRes = `<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
                             <strong>TOTALE</strong> 
-                            <span style="font-size:1.2em; font-weight:800; color:var(--vvf-red);">${totaleOre.toFixed(2)} ore</span>
+                            <span style="font-size:1.4em; font-weight:800; color:var(--vvf-red);">${totale.toFixed(2)} ore</span>
                            </div>`;
             
             segmenti.forEach(s => {
@@ -428,33 +481,74 @@
             });
             
             htmlRes += `<div style="margin-top:10px; border-top:1px solid #ccc; padding-top:10px; font-size:13px; color:#555;">
-                        💰 Richiedi pagamento nel turno: <span class="badge bg-${turnoRientro}">${turnoRientro}</span></div>`;
+                        <b>SEGNA ORE AL TURNO:</b> <span class="badge bg-${turnoRientro}">${turnoRientro}</span></div>`;
             
             let box = document.getElementById('risultato-box');
             box.innerHTML = htmlRes;
             box.style.display = 'block';
-
-            // 2. Salva nello storico
-            let record = {
-                id: Date.now(),
-                tipo: tipo,
-                inizio: inizio.toISOString(),
-                fine: fine.toISOString(),
-                totale: totaleOre.toFixed(2),
-                rientro: turnoRientro,
-                segmenti: segmenti,
-                note: note
-            };
-            salvaRecord(record);
+            document.getElementById('btn-vedi-dettaglio').classList.remove('hidden');
         }
 
         // ===============================================
-        //  4. GESTIONE STORICO (PERSISTENZA)
+        //  4. GESTIONE VIEW DETTAGLI
         // ===============================================
 
-        function getHistoryKey() {
-            return `vvf_history_${currentUser}`;
+        function mostraDettaglioUltimo() {
+            if(ultimoCalcoloDettagli) renderizzaDettagli(ultimoCalcoloDettagli);
         }
+
+        function mostraDettaglioDaStorico(id) {
+            let list = JSON.parse(localStorage.getItem(getHistoryKey()) || '[]');
+            let item = list.find(x => x.id === id);
+            if(item && item.dettagli) {
+                renderizzaDettagli(item.dettagli);
+            } else {
+                alert("Dettagli non disponibili per vecchie registrazioni.");
+            }
+        }
+
+        function renderizzaDettagli(d) {
+            let html = `
+                <table class="detail-table">
+                    <tr>
+                        <td class="detail-label">Feriali (06-22)</td>
+                        <td class="detail-val" style="color:var(--vvf-dark)">${d.feriale.toFixed(2)} h</td>
+                    </tr>
+                    <tr>
+                        <td class="detail-label">Festivi (06-22) - Solo Dom</td>
+                        <td class="detail-val" style="color:#fbc02d">${d.festivo.toFixed(2)} h</td>
+                    </tr>
+                    <tr>
+                        <td class="detail-label">Super Festivi (06-22)</td>
+                        <td class="detail-val" style="color:var(--vvf-red)">${d.super_festivo.toFixed(2)} h</td>
+                    </tr>
+                    <tr>
+                        <td class="detail-label">Notturne (22-06)</td>
+                        <td class="detail-val" style="color:var(--vvf-teal)">${d.notturno.toFixed(2)} h</td>
+                    </tr>
+                    <tr style="background:#eee;">
+                        <td>TOTALE</td>
+                        <td class="detail-val">${(d.feriale+d.festivo+d.super_festivo+d.notturno).toFixed(2)} h</td>
+                    </tr>
+                </table>
+                <p style="font-size:12px; color:#888; margin-top:10px;">* I giorni Super Festivi includono Natale, Capodanno, Pasqua ecc.</p>
+            `;
+            
+            document.getElementById('detail-content').innerHTML = html;
+            document.getElementById('view-app').classList.add('hidden');
+            document.getElementById('view-detail').classList.remove('hidden');
+        }
+
+        function chiudiDettaglio() {
+            document.getElementById('view-detail').classList.add('hidden');
+            document.getElementById('view-app').classList.remove('hidden');
+        }
+
+        // ===============================================
+        //  5. PERSISTENZA STORICO
+        // ===============================================
+
+        function getHistoryKey() { return `vvf_history_${currentUser}`; }
 
         function salvaRecord(record) {
             let key = getHistoryKey();
@@ -468,51 +562,42 @@
             let list = JSON.parse(localStorage.getItem(getHistoryKey()) || '[]');
             let container = document.getElementById('lista-storico');
             
-            if (list.length === 0) {
-                container.innerHTML = '<p style="text-align:center; font-size:13px; color:#999;">Nessuna registrazione.</p>';
-                return;
-            }
+            if (list.length === 0) { container.innerHTML = '<p style="text-align:center; font-size:13px; color:#999;">Nessuna registrazione.</p>'; return; }
 
             let html = '';
             list.forEach(item => {
                 let dIniz = new Date(item.inizio);
                 let dFin = new Date(item.fine);
-                
                 let dataStr = dIniz.toLocaleDateString('it-IT', {day:'numeric', month:'short'});
-                let oraStr = `${dIniz.getHours()}:${String(dIniz.getMinutes()).padStart(2,'0')} - ${dFin.getHours()}:${String(dFin.getMinutes()).padStart(2,'0')}`;
-
-                let dettagliHtml = item.segmenti.map(s => `<b>${s.turno}</b>`).join('+');
-
+                
                 html += `
                 <div class="history-item">
-                    <div class="history-date">${dataStr} <span style="font-weight:normal; color:#666;">| ${oraStr}</span></div>
+                    <div style="display:flex; justify-content:space-between;">
+                        <span class="history-date">${dataStr}</span>
+                        <span class="badge bg-${item.rientro}" style="transform:scale(0.8)">${item.rientro}</span>
+                    </div>
                     <div class="history-sub">
-                        <strong style="color:var(--vvf-teal);">${item.tipo}</strong>: ${item.totale}h su [${dettagliHtml}]<br>
-                        ${item.note ? `<em>Note: ${item.note}</em>` : ''}
+                        <strong>${item.tipo}</strong>: ${item.totale}h <br>
                     </div>
-                    <div class="history-turn">
-                        <span class="badge bg-${item.rientro}">${item.rientro}</span>
+                    <div style="margin-top:5px;">
+                        <button class="ghost" style="padding:5px; width:auto; font-size:12px; margin:0;" onclick="mostraDettaglioDaStorico(${item.id})">Dettagli Fasce</button>
+                        <button class="btn-delete" style="float:right; margin-top:5px;" onclick="eliminaRecord(${item.id})">Elimina</button>
                     </div>
-                    <button class="btn-delete" onclick="eliminaRecord(${item.id})">Elimina</button>
                 </div>`;
             });
             container.innerHTML = html;
         }
 
         function eliminaRecord(id) {
-            if(!confirm("Eliminare questa registrazione?")) return;
+            if(!confirm("Eliminare?")) return;
             let key = getHistoryKey();
             let list = JSON.parse(localStorage.getItem(key) || '[]');
-            let newList = list.filter(x => x.id !== id);
-            localStorage.setItem(key, JSON.stringify(newList));
+            localStorage.setItem(key, JSON.stringify(list.filter(x => x.id !== id)));
             caricaStorico();
         }
 
         function resetStorico() {
-            if(confirm("Sei sicuro di voler cancellare tutto lo storico?")) {
-                localStorage.removeItem(getHistoryKey());
-                caricaStorico();
-            }
+            if(confirm("Cancellare tutto?")) { localStorage.removeItem(getHistoryKey()); caricaStorico(); }
         }
     </script>
 </body>
