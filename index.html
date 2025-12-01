@@ -48,7 +48,7 @@
             border-radius: 10px; 
             font-size: 16px; 
             background: #fff;
-            box-sizing: border-box; 
+            box-sizing: border-box; /* Fix padding issues */
             transition: border-color 0.3s;
         }
         input:focus, select:focus, textarea:focus { 
@@ -79,11 +79,23 @@
         .error-msg { color: #d32f2f; font-size: 13px; margin-top: 5px; font-weight: bold; display: none; }
 
         /* BADGES TURNI */
-        .badge { display: inline-block; padding: 4px 10px; border-radius: 6px; color: white; font-weight: bold; font-size: 0.9em; min-width: 30px; text-align: center; }
+        .badge { 
+            display: inline-flex; 
+            align-items: center;
+            justify-content: center;
+            padding: 4px 12px; 
+            border-radius: 6px; 
+            color: white; 
+            font-weight: 800; 
+            font-size: 1em; 
+            min-width: 35px; 
+            text-align: center; 
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
         .bg-A { background-color: #d32f2f; } /* Rosso */
         .bg-B { background-color: #2e7d32; } /* Verde Scuro */
         .bg-C { background-color: #1565c0; } /* Blu */
-        .bg-D { background-color: #f9a825; color: black; } /* Giallo Scuro */
+        .bg-D { background-color: #fbc02d; color: #333; } /* Giallo */
 
         /* RISULTATI */
         .result-box { background-color: #e0f2f1; border-left: 5px solid var(--vvf-teal); padding: 15px; border-radius: 8px; margin-top: 20px; display: none; }
@@ -105,10 +117,24 @@
         }
 
         .hidden { display: none !important; }
+        
+        /* INFO BANNER */
+        .info-turno-box {
+            background: white; 
+            padding: 15px; 
+            border-radius: 12px; 
+            margin-top: 10px; 
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05); 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center;
+            border-left: 4px solid var(--vvf-red);
+        }
     </style>
 </head>
 <body>
 
+    <!-- SCHERMATA LOGIN -->
     <div id="view-login">
         <div class="header" style="margin-top: 40px;">
             <h1>🚒 VVF Mobile</h1>
@@ -138,15 +164,22 @@
         </div>
     </div>
 
+    <!-- SCHERMATA APP -->
     <div id="view-app" class="hidden">
         <div class="header">
             <div style="display:flex; justify-content:space-between; align-items:center;">
                 <h1 style="font-size: 20px;">Registro Attività</h1>
-                <span id="user-badge" style="background:#eee; padding:5px 10px; border-radius:20px; font-size:12px; font-weight:bold;">User</span>
+                <span id="user-badge" style="background:#eee; padding:5px 10px; border-radius:20px; font-size:12px; font-weight:bold; color: #555;">User</span>
             </div>
-            <div style="background: white; padding: 10px; border-radius: 10px; margin-top: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center;">
-                <span style="font-weight: 600; color: #555;">Oggi (Real-time):</span>
-                <span id="oggi-turno-badge">...</span>
+            
+            <div class="info-turno-box">
+                <div>
+                    <span style="font-size: 12px; color: #888; display:block;">ADESSO IN SERVIZIO</span>
+                    <strong id="orario-live" style="font-size: 14px;">--:--</strong>
+                </div>
+                <div id="oggi-turno-badge">
+                    ...
+                </div>
             </div>
         </div>
 
@@ -155,6 +188,7 @@
             <select id="tipo">
                 <option value="Soccorso">🔥 Straordinario SOCCORSO</option>
                 <option value="Guida">🚒 Ore di GUIDA</option>
+                <option value="Boschivo">🌲 AIB / Boschivo</option>
             </select>
 
             <label>Inizio Servizio</label>
@@ -182,42 +216,66 @@
 
     <script>
         // ===============================================
-        //  1. CONFIGURAZIONE MATEMATICA TURNI (CORRETTA)
+        //  1. MOTORE MATEMATICO TURNI (CORRETTO)
         // ===============================================
         
-        // Sequenza ciclica di 8 turni
-        const sequenzaTurni = ['C', 'B', 'D', 'C', 'A', 'D', 'B', 'A'];
+        // Sequenza ciclica: 
+        // 1 Dic Giorno=C, 1 Dic Notte=B, 2 Dic Giorno=D, 2 Dic Notte=C...
+        const sequenzaTurni = ['C', 'B', 'D', 'C', 'A', 'D', 'B', 'A']; 
         
-        // PUNTO ZERO ASSOLUTO: 1 Dicembre 2025 ore 08:00 = INIZIO TURNO C
-        // Nota: new Date(Anno, Mese-1, Giorno, Ore). 11 = Dicembre.
-        const dataAncora = new Date(2025, 11, 1, 8, 0, 0); 
+        // ANCORA FISSA: 1 Dicembre 2024 (Data di calibrazione)
+        // Usiamo un riferimento "Puro" a mezzanotte per contare i giorni
+        const dataAncora = new Date(2024, 11, 1, 0, 0, 0); // 11 = Dicembre
 
         function getTurno(dataOggetto) {
-            // Differenza in ore dall'ancora
-            let diffMs = dataOggetto.getTime() - dataAncora.getTime();
-            let oreDiff = diffMs / (1000 * 60 * 60);
+            // Clona la data per non modificarla
+            let d = new Date(dataOggetto);
+            let ora = d.getHours();
+
+            // LOGICA NOTTE (Cruciale per sincronizzazione):
+            // Il turno notturno va dalle 20:00 alle 08:00.
+            // Se sono le 04:00 del 2 Dicembre, siamo tecnicamente ancora nel turno
+            // iniziato la sera del 1 Dicembre. Quindi per il calcolo, consideriamo "ieri".
             
-            // Ogni turno dura 12 ore. Math.floor gestisce anche tempi passati (negativi)
-            let blocchiPassati = Math.floor(oreDiff / 12);
+            let isNotte = false;
+
+            if (ora >= 20) {
+                // E' sera/notte del giorno corrente
+                isNotte = true;
+            } else if (ora < 8) {
+                // E' mattina presto, ma appartiene al turno notturno del giorno PRIMA
+                isNotte = true;
+                d.setDate(d.getDate() - 1); // Torno indietro di 1 giorno solare
+            }
+
+            // Calcolo giorni interi passati dall'ancora (1 Dic 2024)
+            let start = new Date(2024, 11, 1, 0, 0, 0);
+            let current = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 0, 0, 0);
             
-            // Modulo ciclico per indice array
-            let indice = ((blocchiPassati % 8) + 8) % 8;
-            return sequenzaTurni[indice];
+            let diffTime = current.getTime() - start.getTime();
+            let diffDays = Math.round(diffTime / (1000 * 3600 * 24));
+
+            // Ogni giorno ha 2 slot nella sequenza (Giorno, Notte)
+            // Indice base = giorni * 2
+            let indiceBase = diffDays * 2;
+            
+            // Se siamo nello slot notturno, avanziamo di 1
+            if (isNotte) {
+                indiceBase += 1;
+            }
+
+            // Calcolo modulo (gestisce anche date passate/negative)
+            let indiceFinale = ((indiceBase % 8) + 8) % 8;
+            
+            return sequenzaTurni[indiceFinale];
         }
 
         // ===============================================
         //  2. SISTEMA DI LOGIN
         // ===============================================
-        let dbUtenti = {};
-        try {
-            dbUtenti = JSON.parse(localStorage.getItem('vvf_users_db') || '{}');
-        } catch(e) {
-            console.error("Errore lettura DB locale", e);
-            dbUtenti = {};
-        }
-
+        let dbUtenti = JSON.parse(localStorage.getItem('vvf_users_db') || '{}');
         let currentUser = null;
-        let loginState = 'check'; 
+        let loginState = 'check';
 
         function checkUser() {
             let userField = document.getElementById('username');
@@ -233,7 +291,7 @@
                     document.getElementById('login-intro').innerText = "Bentornato! Inserisci la tua password.";
                     btn.innerText = "ACCEDI";
                     loginState = 'login';
-                    userField.disabled = true; 
+                    userField.disabled = true;
                 } else {
                     document.getElementById('register-section').classList.remove('hidden');
                     document.getElementById('login-intro').innerText = "Creazione nuovo profilo.";
@@ -276,11 +334,9 @@
             document.getElementById('user-badge').innerText = user;
             
             impostaDateDefault();
-            aggiornaTurnoOggi();
+            aggiornaLiveUI();
+            setInterval(aggiornaLiveUI, 60000); // Aggiorna ogni minuto
             caricaStorico();
-            
-            // Aggiorna ogni minuto
-            setInterval(aggiornaTurnoOggi, 60000);
         }
 
         function logout() {
@@ -288,14 +344,21 @@
         }
 
         // ===============================================
-        //  3. LOGICA CALCOLO
+        //  3. LOGICA APP E CALCOLO
         // ===============================================
 
-        function aggiornaTurnoOggi() {
+        function aggiornaLiveUI() {
             let now = new Date();
             let turno = getTurno(now);
+            
+            // Format orario
+            let ore = String(now.getHours()).padStart(2, '0');
+            let min = String(now.getMinutes()).padStart(2, '0');
+            document.getElementById('orario-live').innerText = `${ore}:${min}`;
+
+            // Badge Turno Attuale
             document.getElementById('oggi-turno-badge').innerHTML = 
-                `<span class="badge bg-${turno}" style="font-size:1.2em;">TURNO ${turno}</span>`;
+                `<span class="badge bg-${turno}" style="font-size:1.4em; padding:8px 16px;">TURNO ${turno}</span>`;
         }
 
         function impostaDateDefault() {
@@ -318,23 +381,26 @@
             let cursore = new Date(inizio);
             let totaleOre = 0;
 
+            // Algoritmo di scansione temporale
             while (cursore < fine) {
                 let prossimoCambio = new Date(cursore);
                 let ora = cursore.getHours();
 
-                // Cambio turno: 08:00 e 20:00
+                // Logica Cambio Turno: 08:00 e 20:00
                 if (ora >= 8 && ora < 20) {
-                    prossimoCambio.setHours(20, 0, 0, 0); 
+                    prossimoCambio.setHours(20, 0, 0, 0);
                 } else {
                     if (ora >= 20) prossimoCambio.setDate(prossimoCambio.getDate() + 1);
-                    prossimoCambio.setHours(8, 0, 0, 0); 
+                    prossimoCambio.setHours(8, 0, 0, 0);
                 }
 
                 let fineSegmento = (prossimoCambio < fine) ? prossimoCambio : fine;
                 let durataMs = fineSegmento - cursore;
                 let durataOre = durataMs / (1000 * 60 * 60);
                 
-                let turnoAttivo = getTurno(cursore);
+                // Usiamo un punto medio del segmento per determinare il turno in modo sicuro
+                let puntoMedio = new Date(cursore.getTime() + (durataMs / 2));
+                let turnoAttivo = getTurno(puntoMedio);
 
                 segmenti.push({
                     turno: turnoAttivo,
@@ -345,20 +411,30 @@
                 cursore = fineSegmento;
             }
 
+            // Calcolo Turno di Rientro (l'ultimo istante di lavoro)
             let dataUltimoIstante = new Date(fine.getTime() - 1000);
             let turnoRientro = getTurno(dataUltimoIstante);
 
-            let htmlRes = `<strong>Totale: ${totaleOre.toFixed(2)} ore</strong><br>`;
+            // 1. Mostra risultato immediato
+            let htmlRes = `<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                            <strong>TOTALE</strong> 
+                            <span style="font-size:1.2em; font-weight:800; color:var(--vvf-red);">${totaleOre.toFixed(2)} ore</span>
+                           </div>`;
+            
             segmenti.forEach(s => {
-                htmlRes += `• ${s.ore.toFixed(2)}h su <span class="badge bg-${s.turno}">${s.turno}</span><br>`;
+                htmlRes += `<div style="margin-bottom:4px; font-size:14px;">
+                                • ${s.ore.toFixed(2)}h su <span class="badge bg-${s.turno}" style="font-size:0.8em; padding:2px 6px;">${s.turno}</span>
+                            </div>`;
             });
-            htmlRes += `<div style="margin-top:10px; border-top:1px solid #ccc; padding-top:5px;">
+            
+            htmlRes += `<div style="margin-top:10px; border-top:1px solid #ccc; padding-top:10px; font-size:13px; color:#555;">
                         💰 Richiedi pagamento nel turno: <span class="badge bg-${turnoRientro}">${turnoRientro}</span></div>`;
             
             let box = document.getElementById('risultato-box');
             box.innerHTML = htmlRes;
             box.style.display = 'block';
 
+            // 2. Salva nello storico
             let record = {
                 id: Date.now(),
                 tipo: tipo,
@@ -373,7 +449,7 @@
         }
 
         // ===============================================
-        //  4. GESTIONE STORICO
+        //  4. GESTIONE STORICO (PERSISTENZA)
         // ===============================================
 
         function getHistoryKey() {
@@ -404,13 +480,14 @@
                 
                 let dataStr = dIniz.toLocaleDateString('it-IT', {day:'numeric', month:'short'});
                 let oraStr = `${dIniz.getHours()}:${String(dIniz.getMinutes()).padStart(2,'0')} - ${dFin.getHours()}:${String(dFin.getMinutes()).padStart(2,'0')}`;
-                let dettagliHtml = item.segmenti.map(s => `${s.ore.toFixed(1)}h(${s.turno})`).join('+');
+
+                let dettagliHtml = item.segmenti.map(s => `<b>${s.turno}</b>`).join('+');
 
                 html += `
                 <div class="history-item">
                     <div class="history-date">${dataStr} <span style="font-weight:normal; color:#666;">| ${oraStr}</span></div>
                     <div class="history-sub">
-                        <strong>${item.tipo}</strong>: ${item.totale}h [${dettagliHtml}]<br>
+                        <strong style="color:var(--vvf-teal);">${item.tipo}</strong>: ${item.totale}h su [${dettagliHtml}]<br>
                         ${item.note ? `<em>Note: ${item.note}</em>` : ''}
                     </div>
                     <div class="history-turn">
