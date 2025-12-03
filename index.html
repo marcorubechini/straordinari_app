@@ -193,7 +193,7 @@
             </div>
         </div>
 
-        <!-- NUOVO BOTTONE REPORT -->
+        <!-- BOTTONE REPORT -->
         <button class="pdf-btn" onclick="apriReport()">📄 REPORT E PDF</button>
 
         <div class="card" style="margin-top:15px;">
@@ -248,7 +248,7 @@
         </div>
     </div>
 
-    <!-- SCHERMATA REPORT/PDF (NUOVA) -->
+    <!-- SCHERMATA REPORT/PDF -->
     <div id="view-report" class="hidden">
         <div class="header">
             <h1 style="font-size: 20px;">ESPORTAZIONE</h1>
@@ -272,143 +272,62 @@
     </div>
 
     <script>
-        // ... (SETUP VARIABILI E DATI COME v8) ...
+        // CONFIGURAZIONE VARIABILI
         const DATI_QUALIFICHE = { 'allievo': { label: 'Allievo VVF', feriale: 13.94, mista: 15.76, festNotte: 18.18 }, 'vigile': { label: 'Vigile del Fuoco', feriale: 13.94, mista: 15.76, festNotte: 18.18 }, 'vigile_esp': { label: 'Vigile Esperto', feriale: 14.33, mista: 16.20, festNotte: 18.69 }, 'vigile_coord': { label: 'Vigile Coord.', feriale: 15.16, mista: 17.13, festNotte: 19.77 }, 'vigile_scatto': { label: 'Vigile Coord. + Scatto', feriale: 15.81, mista: 17.88, festNotte: 20.63 }, 'capo_squadra': { label: 'Capo Squadra', feriale: 15.81, mista: 17.88, festNotte: 20.63 }, 'cs_esperto': { label: 'Capo Squadra Esp.', feriale: 16.17, mista: 18.28, festNotte: 21.09 }, 'capo_reparto': { label: 'Capo Reparto', feriale: 16.36, mista: 18.50, festNotte: 21.35 }, 'cr_scatto': { label: 'Capo Reparto + Scatto', feriale: 17.04, mista: 19.27, festNotte: 22.23 } };
         const LUOGHI_VIGILANZA = ["FIERA", "MANIFESTAZIONE", "PALA MONTEPASCHI", "PALAESTRA", "PALIO", "PROVA PALIO", "STADIO", "TEATRO CHIGI SARACINI", "TEATRO DEI RINNOVATI", "TEATRO DEI ROZZI", "TEATRO DEL POPOLO", "TEATRO POLITEAMA", "TEATRO SANT'AGOSTINO"].sort();
         const sequenzaTurni = ['C', 'B', 'D', 'C', 'A', 'D', 'B', 'A']; const dataAncora = new Date(2025, 11, 1, 8, 0, 0); const superFestiviFissi = ["1/1", "6/1", "25/4", "1/5", "2/6", "15/8", "1/11", "8/12", "25/12", "26/12"];
 
-        // ... (EVENT LISTENER E LOGICA UTENTE UGUALI A v8) ...
-        document.addEventListener('DOMContentLoaded', () => { let selLuoghi = document.getElementById('luogo-vigilanza'); selLuoghi.innerHTML = ""; LUOGHI_VIGILANZA.forEach(luogo => { let opt = document.createElement('option'); opt.value = luogo; opt.text = luogo; selLuoghi.add(opt); }); });
-        
-        // ... (COPIA LE FUNZIONI DI LOGIN, SETTINGS E CALCOLO DALLA v8, SONO INVARIATE) ...
-        // INCOLLA QUI LE FUNZIONI: popolaSelectQualifiche, toggleVigilanzaUI, checkUser, resetLoginUI, avviaApp, logout
-        // INCOLLA QUI LE FUNZIONI SETTINGS: apriImpostazioni, aggiornaTariffeSettings, salvaImpostazioni, chiudiImpostazioni
-        // INCOLLA QUI LE FUNZIONI CALCOLO: isPasquaOPasquetta, getTurno, getCategoriaOraria, calcolaESalva
-        // INCOLLA QUI LE FUNZIONI UI: formattaOreMinuti, mostraRisultatoBox, mostraDettaglioUltimo, mostraDettaglioDaStorico, renderizzaDettagli, chiudiDettaglio
-        // INCOLLA QUI LE FUNZIONI STANDARD: toggleRecovery, getHistoryKey, salvaRecord, toggleVisto, caricaStorico, eliminaRecord, resetStorico, aggiornaLiveUI, impostaDateDefault
-
-        // ===============================================
-        //  NUOVA LOGICA REPORT PDF (v9)
-        // ===============================================
-        function apriReport() {
-            document.getElementById('view-app').classList.add('hidden');
-            document.getElementById('view-report').classList.remove('hidden');
-            // Default date: Primo e ultimo giorno del mese corrente
-            let d = new Date();
-            let y = d.getFullYear(), m = d.getMonth();
-            document.getElementById('pdf-start').value = new Date(y, m, 1).toISOString().slice(0,10);
-            document.getElementById('pdf-end').value = new Date(y, m+1, 0).toISOString().slice(0,10);
-        }
-
-        function chiudiReport() {
-            document.getElementById('view-report').classList.add('hidden');
-            document.getElementById('view-app').classList.remove('hidden');
-        }
-
-        function generaPDF() {
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
-            
-            let startStr = document.getElementById('pdf-start').value;
-            let endStr = document.getElementById('pdf-end').value;
-            if(!startStr || !endStr) { alert("Seleziona le date."); return; }
-            
-            let start = new Date(startStr);
-            let end = new Date(endStr);
-            end.setHours(23, 59, 59); // Fine giornata inclusa
-
-            // Recupera e filtra dati
-            let list = JSON.parse(localStorage.getItem(getHistoryKey()) || '[]');
-            let filtered = list.filter(item => {
-                let d = new Date(item.inizio);
-                return d >= start && d <= end;
-            }).reverse(); // Ordine cronologico per il PDF
-
-            if(filtered.length === 0) { alert("Nessun dato nel periodo selezionato."); return; }
-
-            // --- COSTRUZIONE PDF ---
-            
-            // Header
-            doc.setFontSize(16);
-            doc.setTextColor(206, 56, 36); // Rosso VVF
-            doc.text("VIGILI DEL FUOCO SIENA", 105, 20, null, null, "center");
-            
-            doc.setFontSize(11);
-            doc.setTextColor(0, 0, 0);
-            doc.text(`Riepilogo Prestazioni - Utente: ${currentUser.toUpperCase()}`, 14, 30);
-            doc.text(`Periodo: ${start.toLocaleDateString()} - ${end.toLocaleDateString()}`, 14, 36);
-
-            // Tabella Dati
-            let rows = filtered.map(item => {
-                let data = new Date(item.inizio).toLocaleDateString();
-                let tipo = item.tipo;
-                if(item.luogo) tipo += ` (${item.luogo})`;
-                let ore = formattaOreMinuti(item.totale);
-                let euro = item.importo ? `€ ${item.importo.toFixed(2)}` : "-";
-                let note = item.note || "";
-                return [data, tipo, ore, euro, note];
-            });
-
-            doc.autoTable({
-                startY: 45,
-                head: [['Data', 'Attività', 'Ore', 'Importo', 'Note']],
-                body: rows,
-                theme: 'grid',
-                headStyles: { fillColor: [206, 56, 36], textColor: 255 }, // Rosso
-                styles: { fontSize: 9 }
-            });
-
-            // Calcolo Totali
-            let totOre = filtered.reduce((acc, x) => acc + parseFloat(x.totale), 0);
-            let totEuro = filtered.reduce((acc, x) => acc + (x.importo || 0), 0);
-
-            let finalY = doc.lastAutoTable.finalY + 10;
-            
-            doc.setFontSize(12);
-            doc.setFont("helvetica", "bold");
-            doc.text(`TOTALE ORE: ${formattaOreMinuti(totOre)}`, 14, finalY);
-            doc.text(`TOTALE ESTIMATO: € ${totEuro.toFixed(2)}`, 14, finalY + 7);
-
-            // Disclaimer Legale (Piè di pagina)
-            doc.setFontSize(8);
-            doc.setFont("helvetica", "italic");
-            doc.setTextColor(100);
-            let disclaimer = "NOTA AMMINISTRATIVA: Gli importi in euro riportati nel presente documento sono stime indicative, calcolate sulla base delle tariffe orarie lorde tabellari. Il valore effettivo della liquidazione in busta paga è soggetto a variabili fiscali, previdenziali e amministrative (es. conguagli, addizionali regionali/comunali, detrazioni) non gestibili da questo software. Il presente prospetto non costituisce certificazione ufficiale.";
-            
-            // Stampa disclaimer multilinea in fondo
-            let splitText = doc.splitTextToSize(disclaimer, 180);
-            doc.text(splitText, 14, 280); 
-
-            doc.save(`Report_VVF_${startStr}_${endStr}.pdf`);
-        }
-
-        // ---------------------------------------------
-        // VARIABILI GLOBALI MANCANTI (DAL CODICE PRECEDENTE)
-        // ---------------------------------------------
         let dbUtenti = JSON.parse(localStorage.getItem('vvf_users_db') || '{}');
         let currentUser = null;
         let loginState = 'check';
         let userRates = null;
         let ultimoCalcoloDettagli = null;
 
-        // INCOLLA QUI TUTTE LE ALTRE FUNZIONI MANCANTI DALLA v8 PER FAR FUNZIONARE TUTTO
-        // (Per brevità non le ripeto qui, ma nel file finale devono esserci tutte:
-        // checkUser, avviaApp, calcolaESalva, ecc...)
+        // --- FUNZIONI DI SUPPORTO ESSENZIALI (Ripristinate) ---
         
-        // --- BLOCCO REPLICATO FUNZIONI ESSENZIALI (Per rendere il codice copiabile e funzionante) ---
+        // Popolamento select
+        document.addEventListener('DOMContentLoaded', () => { 
+            let selLuoghi = document.getElementById('luogo-vigilanza'); 
+            selLuoghi.innerHTML = ""; 
+            LUOGHI_VIGILANZA.forEach(luogo => { let opt = document.createElement('option'); opt.value = luogo; opt.text = luogo; selLuoghi.add(opt); }); 
+        });
+
+        // Questa è la funzione che mancava nella v9!
+        function popolaSelectQualifiche(idSelect) {
+            let sel = document.getElementById(idSelect);
+            if (!sel) return;
+            sel.innerHTML = "";
+            for (let k in DATI_QUALIFICHE) {
+                let opt = document.createElement('option');
+                opt.value = k;
+                opt.text = DATI_QUALIFICHE[k].label;
+                sel.add(opt);
+            }
+        }
+
+        // Funzioni App
         function checkUser() { let user = document.getElementById('username').value.trim(); if(!user) return; if (loginState === 'check') { if (dbUtenti.hasOwnProperty(user)) { document.getElementById('password-section').classList.remove('hidden'); document.getElementById('btn-login-action').innerText = "ACCESSO"; loginState = 'login'; document.getElementById('username').disabled = true; } else { document.getElementById('register-section').classList.remove('hidden'); popolaSelectQualifiche('reg-qualifica'); document.getElementById('btn-login-action').innerText = "REGISTRAZIONE"; loginState = 'register'; document.getElementById('username').disabled = true; } } else if (loginState === 'login') { let pass = document.getElementById('password').value; let uData = dbUtenti[user]; if ((typeof uData === 'string' && uData === pass) || (typeof uData === 'object' && uData.password === pass)) { avviaApp(user); } else { document.getElementById('error-text').style.display = 'block'; } } else if (loginState === 'register') { let p = document.getElementById('new-password').value; let pin = document.getElementById('recovery-pin').value; let q = document.getElementById('reg-qualifica').value; if(p && pin) { dbUtenti[user] = { password: p, pin: pin, qualifica: q, tariffe: { ...DATI_QUALIFICHE[q], vigilanza: 0, decreto81: 0 } }; localStorage.setItem('vvf_users_db', JSON.stringify(dbUtenti)); avviaApp(user); } else { alert("Compila tutti i campi."); } } }
         function avviaApp(user) { currentUser = user; let uData = dbUtenti[user]; if(!uData.tariffe) { uData.qualifica = 'vigile'; uData.tariffe = { ...DATI_QUALIFICHE['vigile'], vigilanza: 0, decreto81: 0 }; dbUtenti[user] = uData; localStorage.setItem('vvf_users_db', JSON.stringify(dbUtenti)); } if(uData.tariffe.vigilanza === undefined) uData.tariffe.vigilanza = 0; if(uData.tariffe.decreto81 === undefined) uData.tariffe.decreto81 = 0; userRates = uData.tariffe; document.getElementById('view-login').classList.add('hidden'); document.getElementById('view-app').classList.remove('hidden'); document.getElementById('user-badge').innerText = user.toUpperCase(); impostaDateDefault(); aggiornaLiveUI(); setInterval(aggiornaLiveUI, 60000); caricaStorico(); }
+        function toggleVigilanzaUI() { let tipo = document.getElementById('tipo').value; let box = document.getElementById('box-vigilanza'); if (tipo === 'Vigilanza') box.classList.remove('hidden'); else box.classList.add('hidden'); }
         function calcolaESalva() { let inizio = new Date(document.getElementById('inizio').value); let fine = new Date(document.getElementById('fine').value); let tipo = document.getElementById('tipo').value; let note = document.getElementById('note').value; let luogoVigilanza = (tipo === 'Vigilanza') ? document.getElementById('luogo-vigilanza').value : ""; if (fine <= inizio) { alert("Data fine precedente a inizio!"); return; } let segmenti = []; let cursore = new Date(inizio); let totaleOre = 0; while (cursore < fine) { let prox = new Date(cursore); let ora = cursore.getHours(); if (ora >= 8 && ora < 20) prox.setHours(20, 0, 0, 0); else { if (ora >= 20) prox.setDate(prox.getDate() + 1); prox.setHours(8, 0, 0, 0); } let endSeg = (prox < fine) ? prox : fine; let dur = (endSeg - cursore) / 3600000; let pm = new Date(cursore.getTime() + (endSeg - cursore)/2); segmenti.push({ turno: getTurno(pm), ore: dur }); totaleOre += dur; cursore = endSeg; } let dett = null; let importo = 0; let isSpecialRate = (tipo === 'Vigilanza' || tipo === 'Decreto81'); if (isSpecialRate) { let rate = (tipo === 'Vigilanza') ? userRates.vigilanza : userRates.decreto81; importo = totaleOre * rate; dett = { mode: 'flat', rate: rate }; } else { dett = { mode: 'complex', feriale: 0, mista: 0, festNotte: 0 }; let scanner = new Date(inizio); scanner.setSeconds(0,0); let fineMs = fine.getTime(); while(scanner.getTime() < fineMs) { let cat = getCategoriaOraria(scanner); dett[cat] += (1/60); scanner.setMinutes(scanner.getMinutes() + 1); } importo = (dett.feriale * userRates.feriale) + (dett.mista * userRates.mista) + (dett.festNotte * userRates.festNotte); } let turnoRientro = getTurno(new Date(fine.getTime() - 1000)); ultimoCalcoloDettagli = { tipo: tipo, fasce: dett, soldi: importo, luogo: luogoVigilanza, oreTot: totaleOre }; let record = { id: Date.now(), tipo: tipo, luogo: luogoVigilanza, inizio: inizio.toISOString(), fine: fine.toISOString(), totale: totaleOre, rientro: turnoRientro, segmenti: segmenti, dettagli: dett, importo: importo, note: note, visto: false }; salvaRecord(record); mostraRisultatoBox(totaleOre, importo, turnoRientro); }
         function apriImpostazioni() { document.getElementById('view-app').classList.add('hidden'); document.getElementById('view-settings').classList.remove('hidden'); popolaSelectQualifiche('settings-qualifica'); let uData = dbUtenti[currentUser]; document.getElementById('settings-qualifica').value = uData.qualifica; document.getElementById('tariffa-feriale').value = uData.tariffe.feriale; document.getElementById('tariffa-mista').value = uData.tariffe.mista; document.getElementById('tariffa-festnotte').value = uData.tariffe.festNotte; document.getElementById('tariffa-vigilanza').value = uData.tariffe.vigilanza; document.getElementById('tariffa-decreto81').value = uData.tariffe.decreto81; }
         function aggiornaTariffeSettings() { let newQ = document.getElementById('settings-qualifica').value; let def = DATI_QUALIFICHE[newQ]; document.getElementById('tariffa-feriale').value = def.feriale; document.getElementById('tariffa-mista').value = def.mista; document.getElementById('tariffa-festnotte').value = def.festNotte; }
         function salvaImpostazioni() { let uData = dbUtenti[currentUser]; uData.qualifica = document.getElementById('settings-qualifica').value; uData.tariffe.feriale = parseFloat(document.getElementById('tariffa-feriale').value); uData.tariffe.mista = parseFloat(document.getElementById('tariffa-mista').value); uData.tariffe.festNotte = parseFloat(document.getElementById('tariffa-festnotte').value); uData.tariffe.label = DATI_QUALIFICHE[uData.qualifica].label; uData.tariffe.vigilanza = parseFloat(document.getElementById('tariffa-vigilanza').value) || 0; uData.tariffe.decreto81 = parseFloat(document.getElementById('tariffa-decreto81').value) || 0; dbUtenti[currentUser] = uData; localStorage.setItem('vvf_users_db', JSON.stringify(dbUtenti)); userRates = uData.tariffe; chiudiImpostazioni(); }
         function chiudiImpostazioni() { document.getElementById('view-settings').classList.add('hidden'); document.getElementById('view-app').classList.remove('hidden'); }
+        function apriReport() { document.getElementById('view-app').classList.add('hidden'); document.getElementById('view-report').classList.remove('hidden'); let d = new Date(); let y = d.getFullYear(), m = d.getMonth(); document.getElementById('pdf-start').value = new Date(y, m, 1).toISOString().slice(0,10); document.getElementById('pdf-end').value = new Date(y, m+1, 0).toISOString().slice(0,10); }
+        function chiudiReport() { document.getElementById('view-report').classList.add('hidden'); document.getElementById('view-app').classList.remove('hidden'); }
+        function generaPDF() { const { jsPDF } = window.jspdf; const doc = new jsPDF(); let startStr = document.getElementById('pdf-start').value; let endStr = document.getElementById('pdf-end').value; if(!startStr || !endStr) { alert("Seleziona le date."); return; } let start = new Date(startStr); let end = new Date(endStr); end.setHours(23, 59, 59); let list = JSON.parse(localStorage.getItem(getHistoryKey()) || '[]'); let filtered = list.filter(item => { let d = new Date(item.inizio); return d >= start && d <= end; }).reverse(); if(filtered.length === 0) { alert("Nessun dato nel periodo selezionato."); return; } doc.setFontSize(16); doc.setTextColor(206, 56, 36); doc.text("VIGILI DEL FUOCO SIENA", 105, 20, null, null, "center"); doc.setFontSize(11); doc.setTextColor(0, 0, 0); doc.text(`Riepilogo Prestazioni - Utente: ${currentUser.toUpperCase()}`, 14, 30); doc.text(`Periodo: ${start.toLocaleDateString()} - ${end.toLocaleDateString()}`, 14, 36); let rows = filtered.map(item => { let data = new Date(item.inizio).toLocaleDateString(); let tipo = item.tipo; if(item.luogo) tipo += ` (${item.luogo})`; let ore = formattaOreMinuti(item.totale); let euro = item.importo ? `€ ${item.importo.toFixed(2)}` : "-"; let note = item.note || ""; return [data, tipo, ore, euro, note]; }); doc.autoTable({ startY: 45, head: [['Data', 'Attività', 'Ore', 'Importo', 'Note']], body: rows, theme: 'grid', headStyles: { fillColor: [206, 56, 36], textColor: 255 }, styles: { fontSize: 9 } }); let totOre = filtered.reduce((acc, x) => acc + parseFloat(x.totale), 0); let totEuro = filtered.reduce((acc, x) => acc + (x.importo || 0), 0); let finalY = doc.lastAutoTable.finalY + 10; doc.setFontSize(12); doc.setFont("helvetica", "bold"); doc.text(`TOTALE ORE: ${formattaOreMinuti(totOre)}`, 14, finalY); doc.text(`TOTALE ESTIMATO: € ${totEuro.toFixed(2)}`, 14, finalY + 7); doc.setFontSize(8); doc.setFont("helvetica", "italic"); doc.setTextColor(100); let disclaimer = "NOTA AMMINISTRATIVA: Gli importi in euro riportati nel presente documento sono stime indicative, calcolate sulla base delle tariffe orarie lorde tabellari. Il valore effettivo della liquidazione in busta paga è soggetto a variabili fiscali, previdenziali e amministrative (es. conguagli, addizionali regionali/comunali, detrazioni) non gestibili da questo software. Il presente prospetto non costituisce certificazione ufficiale."; let splitText = doc.splitTextToSize(disclaimer, 180); doc.text(splitText, 14, 280); doc.save(`Report_VVF_${startStr}_${endStr}.pdf`); }
+        
+        // Logica Standard (Time, Helpers, etc)
         function formattaOreMinuti(oreDecimali) { let minTot = Math.round(oreDecimali * 60); let h = Math.floor(minTot / 60); let m = minTot % 60; return `${h}h ${String(m).padStart(2,'0')}m`; }
         function mostraRisultatoBox(totale, soldi, rientro) { let html = `<div style="display:flex; justify-content:space-between; align-items:center;"><strong>TOTALE ORE</strong><span style="font-size:1.4em; font-weight:800; color:var(--tech-dark);">${formattaOreMinuti(totale)}</span></div><div style="display:flex; justify-content:space-between; align-items:center; margin-top:5px; border-top:1px dashed #ccc; padding-top:5px;"><strong>STIMA IMPORTO</strong><span style="font-size:1.6em; font-weight:800; color:var(--vvf-verde);">€ ${soldi.toFixed(2)}</span></div><div style="margin-top:10px; font-size:12px; color:#666;">SEGNA AL TURNO: <span class="badge bg-${rientro}">${rientro}</span></div>`; document.getElementById('risultato-box').innerHTML = html; document.getElementById('risultato-box').style.display = 'block'; document.getElementById('btn-vedi-dettaglio').classList.remove('hidden'); }
         function mostraDettaglioUltimo() { let note = document.getElementById('note').value; renderizzaDettagli(ultimoCalcoloDettagli, note); }
         function mostraDettaglioDaStorico(id) { let list = JSON.parse(localStorage.getItem(getHistoryKey()) || '[]'); let item = list.find(x => x.id === id); if(item) renderizzaDettagli({tipo: item.tipo, fasce: item.dettagli, soldi: item.importo, luogo: item.luogo, oreTot: item.totale}, item.note); }
         function renderizzaDettagli(data, note) { let html = ``; if (data.luogo) html += `<div style="background:var(--vvf-crema); padding:10px; border:1px solid var(--vvf-oro); margin-bottom:15px; font-weight:bold; color:var(--vvf-rosso); text-align:center;">📍 ${data.luogo}</div>`; html += `<table class="detail-table">`; if (data.fasce.mode === 'flat') { html += `<tr><td>TIPO SERVIZIO</td><td class="detail-val" style="color:var(--vvf-rosso)">${data.tipo.toUpperCase()}</td></tr><tr><td>TARIFFA ORARIA</td><td class="detail-val">€ ${data.fasce.rate.toFixed(2)}</td></tr><tr><td>ORE TOTALI</td><td class="detail-val">${formattaOreMinuti(data.oreTot)}</td></tr>`; } else { html += `<tr><td>QUALIFICA</td><td class="detail-val">${userRates.label || 'Standard'}</td></tr><tr><td>FERIALE (06-22)</td><td class="detail-val">${formattaOreMinuti(data.fasce.feriale)}</td></tr><tr><td>FEST/NOTTURNO</td><td class="detail-val">${formattaOreMinuti(data.fasce.mista)}</td></tr><tr><td>FESTIVO NOTTURNO</td><td class="detail-val">${formattaOreMinuti(data.fasce.festNotte)}</td></tr>`; } html += `<tr style="background:rgba(0,0,0,0.05); font-weight:bold;"><td>TOTALE STIMATO</td><td class="detail-val" style="color:var(--vvf-verde); font-size:1.4em;">€ ${data.soldi.toFixed(2)}</td></tr></table>`; if(note) html += `<div class="detail-notes"><strong>NOTE:</strong><br>${note}</div>`; document.getElementById('detail-content').innerHTML = html; document.getElementById('view-app').classList.add('hidden'); document.getElementById('view-detail').classList.remove('hidden'); }
         function chiudiDettaglio() { document.getElementById('view-detail').classList.add('hidden'); document.getElementById('view-app').classList.remove('hidden'); }
+        function isPasquaOPasquetta(date) { const p = ["2025-04-20", "2026-04-05"]; const pq = ["2025-04-21", "2026-04-06"]; let iso = date.toISOString().split('T')[0]; return p.includes(iso) || pq.includes(iso); }
+        function getTurno(d) { let diff = (d.getTime() - dataAncora.getTime()) / 3600000; return sequenzaTurni[((Math.floor(diff/12)%8)+8)%8]; }
+        function getCategoriaOraria(dateObj) { let h = dateObj.getHours(); let d = dateObj.getDate(); let m = dateObj.getMonth() + 1; let keyDate = `${d}/${m}`; let dayOfWeek = dateObj.getDay(); let isNotte = (h < 6 || h >= 22); let isFesta = (dayOfWeek === 0 || superFestiviFissi.includes(keyDate) || isPasquaOPasquetta(dateObj)); if (isNotte && isFesta) return 'festNotte'; if (isFesta) return 'mista'; if (isNotte) return 'mista'; return 'feriale'; }
         function toggleRecovery() { document.getElementById('password-section').classList.toggle('hidden'); document.getElementById('recovery-section').classList.toggle('hidden'); }
         function resetLoginUI() { document.getElementById('password-section').classList.add('hidden'); document.getElementById('register-section').classList.add('hidden'); document.getElementById('recovery-section').classList.add('hidden'); document.getElementById('btn-login-action').innerText = "PROCEDI"; document.getElementById('error-text').style.display = 'none'; loginState = 'check'; }
         function logout() { location.reload(); }
