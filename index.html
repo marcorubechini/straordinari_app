@@ -108,11 +108,19 @@
         .history-sub { font-size: 11px; color: #666; font-family: monospace; }
         .history-actions { display: flex; justify-content: flex-end; gap: 10px; align-items: center; }
         
-        /* Checkbox */
+        /* Checkbox Tecnico */
         .check-container { display: flex; align-items: center; cursor: pointer; font-size: 9px; color: var(--vvf-grigio); font-weight: bold; text-transform: uppercase; }
         .check-box { width: 14px; height: 14px; border: 2px solid var(--tech-border); margin-right: 5px; display: flex; align-items: center; justify-content: center; }
         .history-item.visto .check-box { background-color: var(--vvf-verde); border-color: var(--vvf-verde); }
         .history-item.visto .check-box::after { content: '✔'; color: white; font-size: 10px; }
+
+        /* CHECKBOX LOGIN (Auto-Login) */
+        .login-checkbox {
+            display: flex; align-items: center; justify-content: center;
+            margin-top: 15px; font-size: 11px; color: var(--vvf-rosso);
+            font-weight: 700; cursor: pointer; text-transform: uppercase;
+        }
+        .login-checkbox input { width: auto; margin-right: 8px; }
 
         /* TABELLA DETTAGLI */
         .detail-table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 12px; }
@@ -157,6 +165,12 @@
             <label>Identificativo Utente</label> <input type="text" id="username" placeholder="ES. MARCOROSSI" oninput="resetLoginUI()">
             <div id="password-section" class="hidden">
                 <label>Codice Sicurezza</label> <input type="password" id="password" placeholder="••••••••">
+                
+                <!-- CHECKBOX RESTA COLLEGATO -->
+                <label class="login-checkbox">
+                    <input type="checkbox" id="remember-me"> RESTA COLLEGATO
+                </label>
+
                 <div class="text-link" onclick="toggleRecovery()">PASSWORD SMARRITA?</div>
             </div>
             <div id="register-section" class="hidden">
@@ -276,6 +290,7 @@
         const DATI_QUALIFICHE = { 'allievo': { label: 'Allievo VVF', feriale: 13.94, mista: 15.76, festNotte: 18.18 }, 'vigile': { label: 'Vigile del Fuoco', feriale: 13.94, mista: 15.76, festNotte: 18.18 }, 'vigile_esp': { label: 'Vigile Esperto', feriale: 14.33, mista: 16.20, festNotte: 18.69 }, 'vigile_coord': { label: 'Vigile Coord.', feriale: 15.16, mista: 17.13, festNotte: 19.77 }, 'vigile_scatto': { label: 'Vigile Coord. + Scatto', feriale: 15.81, mista: 17.88, festNotte: 20.63 }, 'capo_squadra': { label: 'Capo Squadra', feriale: 15.81, mista: 17.88, festNotte: 20.63 }, 'cs_esperto': { label: 'Capo Squadra Esp.', feriale: 16.17, mista: 18.28, festNotte: 21.09 }, 'capo_reparto': { label: 'Capo Reparto', feriale: 16.36, mista: 18.50, festNotte: 21.35 }, 'cr_scatto': { label: 'Capo Reparto + Scatto', feriale: 17.04, mista: 19.27, festNotte: 22.23 } };
         const LUOGHI_VIGILANZA = ["FIERA", "MANIFESTAZIONE", "PALA MONTEPASCHI", "PALAESTRA", "PALIO", "PROVA PALIO", "STADIO", "TEATRO CHIGI SARACINI", "TEATRO DEI RINNOVATI", "TEATRO DEI ROZZI", "TEATRO DEL POPOLO", "TEATRO POLITEAMA", "TEATRO SANT'AGOSTINO"].sort();
         const sequenzaTurni = ['C', 'B', 'D', 'C', 'A', 'D', 'B', 'A']; const dataAncora = new Date(2025, 11, 1, 8, 0, 0); const superFestiviFissi = ["1/1", "6/1", "25/4", "1/5", "2/6", "15/8", "1/11", "8/12", "25/12", "26/12"];
+        const LAST_USER_KEY = 'vvf_active_session'; // Chiave per auto-login
 
         let dbUtenti = JSON.parse(localStorage.getItem('vvf_users_db') || '{}');
         let currentUser = null;
@@ -283,13 +298,17 @@
         let userRates = null;
         let ultimoCalcoloDettagli = null;
 
-        // --- FUNZIONI DI SUPPORTO ESSENZIALI (Ripristinate) ---
-        
-        // Popolamento select
+        // --- AVVIO E AUTO-LOGIN ---
         document.addEventListener('DOMContentLoaded', () => { 
             let selLuoghi = document.getElementById('luogo-vigilanza'); 
             selLuoghi.innerHTML = ""; 
             LUOGHI_VIGILANZA.forEach(luogo => { let opt = document.createElement('option'); opt.value = luogo; opt.text = luogo; selLuoghi.add(opt); }); 
+            
+            // Auto-login Check
+            let activeUser = localStorage.getItem(LAST_USER_KEY);
+            if(activeUser && dbUtenti[activeUser]) {
+                avviaApp(activeUser);
+            }
         });
 
         // Questa è la funzione che mancava nella v9!
@@ -306,7 +325,44 @@
         }
 
         // Funzioni App
-        function checkUser() { let user = document.getElementById('username').value.trim(); if(!user) return; if (loginState === 'check') { if (dbUtenti.hasOwnProperty(user)) { document.getElementById('password-section').classList.remove('hidden'); document.getElementById('btn-login-action').innerText = "ACCESSO"; loginState = 'login'; document.getElementById('username').disabled = true; } else { document.getElementById('register-section').classList.remove('hidden'); popolaSelectQualifiche('reg-qualifica'); document.getElementById('btn-login-action').innerText = "REGISTRAZIONE"; loginState = 'register'; document.getElementById('username').disabled = true; } } else if (loginState === 'login') { let pass = document.getElementById('password').value; let uData = dbUtenti[user]; if ((typeof uData === 'string' && uData === pass) || (typeof uData === 'object' && uData.password === pass)) { avviaApp(user); } else { document.getElementById('error-text').style.display = 'block'; } } else if (loginState === 'register') { let p = document.getElementById('new-password').value; let pin = document.getElementById('recovery-pin').value; let q = document.getElementById('reg-qualifica').value; if(p && pin) { dbUtenti[user] = { password: p, pin: pin, qualifica: q, tariffe: { ...DATI_QUALIFICHE[q], vigilanza: 0, decreto81: 0 } }; localStorage.setItem('vvf_users_db', JSON.stringify(dbUtenti)); avviaApp(user); } else { alert("Compila tutti i campi."); } } }
+        function checkUser() { 
+            let user = document.getElementById('username').value.trim(); 
+            if(!user) return; 
+            
+            if (loginState === 'check') { 
+                if (dbUtenti.hasOwnProperty(user)) { 
+                    document.getElementById('password-section').classList.remove('hidden'); 
+                    document.getElementById('btn-login-action').innerText = "ACCESSO"; 
+                    loginState = 'login'; 
+                    document.getElementById('username').disabled = true; 
+                } else { 
+                    document.getElementById('register-section').classList.remove('hidden'); 
+                    popolaSelectQualifiche('reg-qualifica'); // POPOLA MENU REGISTRAZIONE
+                    document.getElementById('btn-login-action').innerText = "REGISTRAZIONE"; 
+                    loginState = 'register'; 
+                    document.getElementById('username').disabled = true; 
+                } 
+            } else if (loginState === 'login') { 
+                let pass = document.getElementById('password').value; 
+                let uData = dbUtenti[user]; 
+                if ((typeof uData === 'string' && uData === pass) || (typeof uData === 'object' && uData.password === pass)) { 
+                    if(document.getElementById('remember-me').checked) localStorage.setItem(LAST_USER_KEY, user);
+                    avviaApp(user); 
+                } else { 
+                    document.getElementById('error-text').style.display = 'block'; 
+                } 
+            } else if (loginState === 'register') { 
+                let p = document.getElementById('new-password').value; 
+                let pin = document.getElementById('recovery-pin').value; 
+                let q = document.getElementById('reg-qualifica').value; 
+                if(p && pin) { 
+                    dbUtenti[user] = { password: p, pin: pin, qualifica: q, tariffe: { ...DATI_QUALIFICHE[q], vigilanza: 0, decreto81: 0 } }; 
+                    localStorage.setItem('vvf_users_db', JSON.stringify(dbUtenti)); 
+                    avviaApp(user); 
+                } else { alert("Compila tutti i campi."); } 
+            } 
+        }
+
         function avviaApp(user) { currentUser = user; let uData = dbUtenti[user]; if(!uData.tariffe) { uData.qualifica = 'vigile'; uData.tariffe = { ...DATI_QUALIFICHE['vigile'], vigilanza: 0, decreto81: 0 }; dbUtenti[user] = uData; localStorage.setItem('vvf_users_db', JSON.stringify(dbUtenti)); } if(uData.tariffe.vigilanza === undefined) uData.tariffe.vigilanza = 0; if(uData.tariffe.decreto81 === undefined) uData.tariffe.decreto81 = 0; userRates = uData.tariffe; document.getElementById('view-login').classList.add('hidden'); document.getElementById('view-app').classList.remove('hidden'); document.getElementById('user-badge').innerText = user.toUpperCase(); impostaDateDefault(); aggiornaLiveUI(); setInterval(aggiornaLiveUI, 60000); caricaStorico(); }
         function toggleVigilanzaUI() { let tipo = document.getElementById('tipo').value; let box = document.getElementById('box-vigilanza'); if (tipo === 'Vigilanza') box.classList.remove('hidden'); else box.classList.add('hidden'); }
         function calcolaESalva() { let inizio = new Date(document.getElementById('inizio').value); let fine = new Date(document.getElementById('fine').value); let tipo = document.getElementById('tipo').value; let note = document.getElementById('note').value; let luogoVigilanza = (tipo === 'Vigilanza') ? document.getElementById('luogo-vigilanza').value : ""; if (fine <= inizio) { alert("Data fine precedente a inizio!"); return; } let segmenti = []; let cursore = new Date(inizio); let totaleOre = 0; while (cursore < fine) { let prox = new Date(cursore); let ora = cursore.getHours(); if (ora >= 8 && ora < 20) prox.setHours(20, 0, 0, 0); else { if (ora >= 20) prox.setDate(prox.getDate() + 1); prox.setHours(8, 0, 0, 0); } let endSeg = (prox < fine) ? prox : fine; let dur = (endSeg - cursore) / 3600000; let pm = new Date(cursore.getTime() + (endSeg - cursore)/2); segmenti.push({ turno: getTurno(pm), ore: dur }); totaleOre += dur; cursore = endSeg; } let dett = null; let importo = 0; let isSpecialRate = (tipo === 'Vigilanza' || tipo === 'Decreto81'); if (isSpecialRate) { let rate = (tipo === 'Vigilanza') ? userRates.vigilanza : userRates.decreto81; importo = totaleOre * rate; dett = { mode: 'flat', rate: rate }; } else { dett = { mode: 'complex', feriale: 0, mista: 0, festNotte: 0 }; let scanner = new Date(inizio); scanner.setSeconds(0,0); let fineMs = fine.getTime(); while(scanner.getTime() < fineMs) { let cat = getCategoriaOraria(scanner); dett[cat] += (1/60); scanner.setMinutes(scanner.getMinutes() + 1); } importo = (dett.feriale * userRates.feriale) + (dett.mista * userRates.mista) + (dett.festNotte * userRates.festNotte); } let turnoRientro = getTurno(new Date(fine.getTime() - 1000)); ultimoCalcoloDettagli = { tipo: tipo, fasce: dett, soldi: importo, luogo: luogoVigilanza, oreTot: totaleOre }; let record = { id: Date.now(), tipo: tipo, luogo: luogoVigilanza, inizio: inizio.toISOString(), fine: fine.toISOString(), totale: totaleOre, rientro: turnoRientro, segmenti: segmenti, dettagli: dett, importo: importo, note: note, visto: false }; salvaRecord(record); mostraRisultatoBox(totaleOre, importo, turnoRientro); }
@@ -330,7 +386,7 @@
         function getCategoriaOraria(dateObj) { let h = dateObj.getHours(); let d = dateObj.getDate(); let m = dateObj.getMonth() + 1; let keyDate = `${d}/${m}`; let dayOfWeek = dateObj.getDay(); let isNotte = (h < 6 || h >= 22); let isFesta = (dayOfWeek === 0 || superFestiviFissi.includes(keyDate) || isPasquaOPasquetta(dateObj)); if (isNotte && isFesta) return 'festNotte'; if (isFesta) return 'mista'; if (isNotte) return 'mista'; return 'feriale'; }
         function toggleRecovery() { document.getElementById('password-section').classList.toggle('hidden'); document.getElementById('recovery-section').classList.toggle('hidden'); }
         function resetLoginUI() { document.getElementById('password-section').classList.add('hidden'); document.getElementById('register-section').classList.add('hidden'); document.getElementById('recovery-section').classList.add('hidden'); document.getElementById('btn-login-action').innerText = "PROCEDI"; document.getElementById('error-text').style.display = 'none'; loginState = 'check'; }
-        function logout() { location.reload(); }
+        function logout() { localStorage.removeItem(LAST_USER_KEY); location.reload(); } // LOGOUT CLEARS REMEMBER ME
         function getHistoryKey() { return `vvf_history_${currentUser}`; }
         function salvaRecord(rec) { let k = getHistoryKey(); let l = JSON.parse(localStorage.getItem(k)||'[]'); l.unshift(rec); localStorage.setItem(k, JSON.stringify(l)); caricaStorico(); }
         function toggleVisto(id) { let k = getHistoryKey(); let l = JSON.parse(localStorage.getItem(k)||'[]'); let i = l.findIndex(x => x.id === id); if(i !== -1) { l[i].visto = !l[i].visto; localStorage.setItem(k, JSON.stringify(l)); caricaStorico(); } }
